@@ -207,16 +207,114 @@ void drawFloor()
 }
 
 // Draw the dino model with a texture
+// void drawDino()
+// {
+//     glEnable(GL_TEXTURE_2D);
+//     // Bind the texture to the dino
+//     glBindTexture(GL_TEXTURE_2D, dinoTexture);
+
+//     glBegin(GL_QUADS);
+//     for (const Face &face : faces)
+//     {
+//         // Calculate face normal for lighting
+//         if (face.vertices.size() >= 3)
+//         {
+//             Vertex v1 = face.vertices[0];
+//             Vertex v2 = face.vertices[1];
+//             Vertex v3 = face.vertices[2];
+
+//             float ux = v2.x - v1.x;
+//             float uy = v2.y - v1.y;
+//             float uz = v2.z - v1.z;
+
+//             float vx = v3.x - v1.x;
+//             float vy = v3.y - v1.y;
+//             float vz = v3.z - v1.z;
+
+//             float nx = uy * vz - uz * vy;
+//             float ny = uz * vx - ux * vz;
+//             float nz = ux * vy - uy * vx;
+
+//             float length = sqrt(nx * nx + ny * ny + nz * nz);
+//             if (length > 0)
+//             {
+//                 nx /= length;
+//                 ny /= length;
+//                 nz /= length;
+//             }
+
+//             glNormal3f(nx, ny, nz);
+//         }
+
+//         // Draw vertices with texture coordinates
+//         for (const Vertex &vertex : face.vertices)
+//         {
+//             glTexCoord2f(vertex.texU, vertex.texV);
+//             glVertex3f(vertex.x, vertex.y, vertex.z);
+//         }
+//     }
+//     glEnd();
+//     glDisable(GL_TEXTURE_2D);
+// }
+
+// Add these global variables at the top of your file for animation
+float tailAngle = 0.0f;
+float headAngle = 0.0f;
+float animationSpeed = 2.0f; // Controls how fast the animation moves
+
+// Add this function to update animation angles
+void updateAnimation()
+{
+    // Update tail swing using sine wave for smooth back and forth motion
+    tailAngle = 15.0f * sin(glutGet(GLUT_ELAPSED_TIME) * 0.001f * animationSpeed);
+
+    // Update head movement with a different frequency
+    headAngle = 10.0f * sin(glutGet(GLUT_ELAPSED_TIME) * 0.0007f * animationSpeed);
+}
+
+// Modified drawDino function to include animations
 void drawDino()
 {
     glEnable(GL_TEXTURE_2D);
-    // Bind the texture to the dino
     glBindTexture(GL_TEXTURE_2D, dinoTexture);
+
+    // Update animation angles
+    updateAnimation();
+
+    glPushMatrix();
+
+    // Split faces into body parts based on their Y position
+    // We'll consider vertices above 75% of max height as head
+    // and vertices below 25% of max height as tail
+    float maxY = -999999.0f;
+    float minY = 999999.0f;
+
+    // First find the Y range of the model
+    for (const Face &face : faces)
+    {
+        for (const Vertex &vertex : face.vertices)
+        {
+            maxY = std::max(maxY, vertex.y);
+            minY = std::min(minY, vertex.y);
+        }
+    }
+
+    float range = maxY - minY;
+    float headThreshold = maxY - (range * 0.25f); // Top 25% is head
+    float tailThreshold = minY + (range * 0.25f); // Bottom 25% is tail
 
     glBegin(GL_QUADS);
     for (const Face &face : faces)
     {
-        // Calculate face normal for lighting
+        // Calculate average Y position for this face
+        float avgY = 0.0f;
+        for (const Vertex &vertex : face.vertices)
+        {
+            avgY += vertex.y;
+        }
+        avgY /= face.vertices.size();
+
+        // Calculate face normal
         if (face.vertices.size() >= 3)
         {
             Vertex v1 = face.vertices[0];
@@ -242,18 +340,44 @@ void drawDino()
                 ny /= length;
                 nz /= length;
             }
-
             glNormal3f(nx, ny, nz);
         }
 
-        // Draw vertices with texture coordinates
+        // Apply different transformations based on part
         for (const Vertex &vertex : face.vertices)
         {
+            float transformedX = vertex.x;
+            float transformedY = vertex.y;
+            float transformedZ = vertex.z;
+
+            if (vertex.y > headThreshold)
+            {
+                // Head movement
+                float angle = headAngle * (vertex.y - headThreshold) / (maxY - headThreshold);
+                float radians = angle * M_PI / 180.0f;
+                float newX = transformedX * cos(radians) - transformedZ * sin(radians);
+                float newZ = transformedX * sin(radians) + transformedZ * cos(radians);
+                transformedX = newX;
+                transformedZ = newZ;
+            }
+            else if (vertex.y < tailThreshold)
+            {
+                // Tail movement
+                float angle = tailAngle * (tailThreshold - vertex.y) / (tailThreshold - minY);
+                float radians = angle * M_PI / 180.0f;
+                float newX = transformedX * cos(radians) - transformedZ * sin(radians);
+                float newZ = transformedX * sin(radians) + transformedZ * cos(radians);
+                transformedX = newX;
+                transformedZ = newZ;
+            }
+
             glTexCoord2f(vertex.texU, vertex.texV);
-            glVertex3f(vertex.x, vertex.y, vertex.z);
+            glVertex3f(transformedX, transformedY, transformedZ);
         }
     }
     glEnd();
+
+    glPopMatrix();
     glDisable(GL_TEXTURE_2D);
 }
 
@@ -413,6 +537,8 @@ void display(void)
 
     glPopMatrix();
     glutSwapBuffers();
+
+    glutPostRedisplay();
 }
 
 void init(void)
