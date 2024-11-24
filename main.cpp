@@ -249,6 +249,138 @@ void drawDino()
     glEnd();
 }
 
+void drawFencePost()
+{
+    glPushMatrix();
+    glColor3f(0.5f, 0.35f, 0.05f);  // Brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(0.1f, 5.0f, 0.1f);     // Scale to make it a thin vertical post, height increased 5 times
+    glutSolidCube(1.0f);
+    glPopMatrix();
+}
+
+// Draw a single horizontal plank
+void drawPlank()
+{
+    glPushMatrix();
+    glColor3f(0.65f, 0.5f, 0.35f);  // Light brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(1.0f, 0.1f, 0.1f);     // Scale to make it a horizontal plank
+    glutSolidCube(1.0f);
+    glPopMatrix();
+}
+
+// Draw one section of the fence
+void drawFenceSection()
+{
+    // Draw two vertical posts
+    glPushMatrix();
+    drawFencePost();
+    glTranslatef(1.0f, 0.0f, 0.0f);
+    drawFencePost();
+    glPopMatrix();
+
+    // Draw two horizontal planks
+    glPushMatrix();
+    drawPlank();
+    glTranslatef(0.0f, -2.5f, 0.0f); // Adjust the position of the second plank
+    drawPlank();
+    glPopMatrix();
+}
+
+void drawFence()
+{
+    float fenceLength = 40.0f; // Length of one side of the floor
+    int numSections = 40;      // Number of fence sections per side
+    float sectionSpacing = fenceLength / numSections;
+
+    // Draw front side
+    for (int i = 0; i <= numSections; i++)
+    {
+        glPushMatrix();
+        glTranslatef(-20.0f + i * sectionSpacing, -0.4f, 20.0f); // Adjust to align with the floor level
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw back side
+    for (int i = 0; i <= numSections; i++)
+    {
+        glPushMatrix();
+        glTranslatef(-20.0f + i * sectionSpacing, -0.4f, -20.0f); // Adjust to align with the floor level
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw left side
+    for (int i = 0; i <= numSections; i++)
+    {
+        glPushMatrix();
+        glTranslatef(-20.0f, -0.4f, -20.0f + i * sectionSpacing); // Adjust to align with the floor level
+        glRotatef(90, 0.0f, 1.0f, 0.0f);
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw right side
+    for (int i = 0; i <= numSections; i++)
+    {
+        glPushMatrix();
+        glTranslatef(20.0f, -0.4f, -20.0f + i * sectionSpacing); // Adjust to align with the floor level
+        glRotatef(90, 0.0f, 1.0f, 0.0f);
+        drawFenceSection();
+        glPopMatrix();
+    }
+}
+// void drawFence()
+// {
+//     // Repeat fence sections along one side
+//     for (int i = 0; i < 30; i++)
+//     {
+//         glPushMatrix();
+//         glTranslatef(i * 1.1f, 0.0f, 0.0f); // Offset each section
+//         drawFenceSection();
+//         glPopMatrix();
+//     }
+
+//     // Repeat for other sides (front, back, left, right)
+//     glPushMatrix();
+//     glTranslatef(10.9f, 0.0f, 0.0f); // Move to the right side
+//     glRotatef(90, 0.0f, 1.0f, 0.0f); // Rotate for side alignment
+//     for (int i = 0; i < 40; i++)
+//     {
+//         glPushMatrix();
+//         glTranslatef(i * 1.1f, 0.0f, 0.0f);
+//         drawFenceSection();
+//         glPopMatrix();
+//     }
+//     glPopMatrix();
+
+//     glPushMatrix();
+//     glTranslatef(10.9f, 0.0f, -10.9f); // Move to the opposite side
+//     glRotatef(180, 0.0f, 1.0f, 0.0f);  // Rotate for back alignment
+//     for (int i = 0; i < 30; i++)
+//     {
+//         glPushMatrix();
+//         glTranslatef(i * 1.1f, 0.0f, 0.0f);
+//         drawFenceSection();
+//         glPopMatrix();
+//     }
+//     glPopMatrix();
+
+//     glPushMatrix();
+//     glTranslatef(0.0f, 0.0f, -10.9f); // Move to the left side
+//     glRotatef(-90, 0.0f, 1.0f, 0.0f); // Rotate for left alignment
+//     for (int i = 0; i < 40; i++)
+//     {
+//         glPushMatrix();
+//         glTranslatef(i * 1.1f, 0.0f, 0.0f);
+//         drawFenceSection();
+//         glPopMatrix();
+//     }
+//     glPopMatrix();
+// }
+
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -291,6 +423,8 @@ void display(void)
     glColor3f(1.0, 1.0, 1.0);
     drawDino();
     glPopMatrix();
+
+    drawFence();
 
     glPopMatrix();
     glutSwapBuffers();
