@@ -185,6 +185,10 @@ void loadFacesFromFile(const char *filename)
 // Draw a floor with a texture
 void drawFloor()
 {
+    glEnable(GL_TEXTURE_2D);
+    // Reset color to white before drawing the textured floor
+    glColor3f(1.0f, 1.0f, 1.0f);
+
     // Bind the texture to the floor
     glBindTexture(GL_TEXTURE_2D, floorTexture);
 
@@ -198,11 +202,14 @@ void drawFloor()
     glTexCoord2f(1.0, 0.0);
     glVertex3f(20.0, -0.4, 20.0);
     glEnd();
+
+    glDisable(GL_TEXTURE_2D);
 }
 
 // Draw the dino model with a texture
 void drawDino()
 {
+    glEnable(GL_TEXTURE_2D);
     // Bind the texture to the dino
     glBindTexture(GL_TEXTURE_2D, dinoTexture);
 
@@ -247,6 +254,7 @@ void drawDino()
         }
     }
     glEnd();
+    glDisable(GL_TEXTURE_2D);
 }
 
 void drawFencePost()
@@ -288,6 +296,27 @@ void drawFenceSection()
     glPopMatrix();
 }
 
+void drawTree()
+{
+    // Draw the trunk
+    glColor3f(0.5f, 0.35f, 0.05f);
+    glPushMatrix();
+    glTranslatef(0.0f, -0.42f, 5.0f);
+    glRotatef(-90, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluNewQuadric(), 0.5, 0.3, 3.0, 5, 20);
+    glPopMatrix();
+
+    // Draw the tree top
+    glColor3f(0, 1, 0);
+    glPushMatrix();
+    glTranslatef(0.0f, 3.0f, 5.0f);
+    glScalef(1.0f, 1.5f, 1.0f);
+    glutSolidIcosahedron();
+    glPopMatrix();
+
+    // Reset color to white after drawing the tree
+    glColor3f(1.0f, 1.0f, 1.0f);
+}
 void drawFence()
 {
     float fenceLength = 40.0f; // Length of one side of the floor
@@ -332,54 +361,6 @@ void drawFence()
         glPopMatrix();
     }
 }
-// void drawFence()
-// {
-//     // Repeat fence sections along one side
-//     for (int i = 0; i < 30; i++)
-//     {
-//         glPushMatrix();
-//         glTranslatef(i * 1.1f, 0.0f, 0.0f); // Offset each section
-//         drawFenceSection();
-//         glPopMatrix();
-//     }
-
-//     // Repeat for other sides (front, back, left, right)
-//     glPushMatrix();
-//     glTranslatef(10.9f, 0.0f, 0.0f); // Move to the right side
-//     glRotatef(90, 0.0f, 1.0f, 0.0f); // Rotate for side alignment
-//     for (int i = 0; i < 40; i++)
-//     {
-//         glPushMatrix();
-//         glTranslatef(i * 1.1f, 0.0f, 0.0f);
-//         drawFenceSection();
-//         glPopMatrix();
-//     }
-//     glPopMatrix();
-
-//     glPushMatrix();
-//     glTranslatef(10.9f, 0.0f, -10.9f); // Move to the opposite side
-//     glRotatef(180, 0.0f, 1.0f, 0.0f);  // Rotate for back alignment
-//     for (int i = 0; i < 30; i++)
-//     {
-//         glPushMatrix();
-//         glTranslatef(i * 1.1f, 0.0f, 0.0f);
-//         drawFenceSection();
-//         glPopMatrix();
-//     }
-//     glPopMatrix();
-
-//     glPushMatrix();
-//     glTranslatef(0.0f, 0.0f, -10.9f); // Move to the left side
-//     glRotatef(-90, 0.0f, 1.0f, 0.0f); // Rotate for left alignment
-//     for (int i = 0; i < 40; i++)
-//     {
-//         glPushMatrix();
-//         glTranslatef(i * 1.1f, 0.0f, 0.0f);
-//         drawFenceSection();
-//         glPopMatrix();
-//     }
-//     glPopMatrix();
-// }
 
 void display(void)
 {
@@ -394,26 +375,28 @@ void display(void)
     glRotatef(sceRY, 0.0, 1.0, 0.0);
 
     // Draw the floor first
-    glPushMatrix();
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, floorTexture);
+    // glPushMatrix();
+    // glEnable(GL_TEXTURE_2D);
+    // glBindTexture(GL_TEXTURE_2D, floorTexture);
 
-    // Set material properties for the floor
-    GLfloat floorMaterial[] = {1.0, 1.0, 1.0, 1.0};
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, floorMaterial);
+    // // Set material properties for the floor
+    // GLfloat floorMaterial[] = {1.0, 1.0, 1.0, 1.0};
+    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, floorMaterial);
 
-    glBegin(GL_QUADS);
-    glNormal3f(0.0, 1.0, 0.0); // Normal pointing up for proper lighting
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f(-20.0, -0.4, 20.0);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f(-20.0, -0.4, -20.0);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f(20.0, -0.4, -20.0);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3f(20.0, -0.4, 20.0);
-    glEnd();
-    glPopMatrix();
+    // glBegin(GL_QUADS);
+    // glNormal3f(0.0, 1.0, 0.0); // Normal pointing up for proper lighting
+    // glTexCoord2f(0.0, 0.0);
+    // glVertex3f(-20.0, -0.4, 20.0);
+    // glTexCoord2f(0.0, 1.0);
+    // glVertex3f(-20.0, -0.4, -20.0);
+    // glTexCoord2f(1.0, 1.0);
+    // glVertex3f(20.0, -0.4, -20.0);
+    // glTexCoord2f(1.0, 0.0);
+    // glVertex3f(20.0, -0.4, 20.0);
+    // glEnd();
+    // glPopMatrix();
+
+    drawFloor();
 
     // Draw the dino
     glPushMatrix();
@@ -425,6 +408,8 @@ void display(void)
     glPopMatrix();
 
     drawFence();
+
+    drawTree();
 
     glPopMatrix();
     glutSwapBuffers();
