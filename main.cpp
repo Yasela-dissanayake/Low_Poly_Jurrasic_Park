@@ -29,6 +29,32 @@ GLfloat objTZ = 0.0;
 GLfloat light1_pos[] = {-10.0, 1.0, -0.5, 1.0}; // First light position
 GLfloat light2_pos[] = {10.0, 1.0, -0.5, 1.0};  // Second light position
 
+float tailAngle = 0.0f;
+float headAngle = 0.0f;
+float animationSpeed = 2.0f; // Controls how fast the animation moves
+
+// Global variables for textures
+GLuint floorTexture;
+GLuint dinoTexture;
+
+// Structure to hold vertex data
+struct Vertex
+{
+    float x, y, z;
+    float texU, texV; // Added texture coordinates
+    Vertex(float _x = 0, float _y = 0, float _z = 0, float _u = 0, float _v = 0)
+        : x(_x), y(_y), z(_z), texU(_u), texV(_v) {}
+};
+
+// Structure to hold face data
+struct Face
+{
+    std::vector<Vertex> vertices;
+};
+
+// Vector to store all faces
+std::vector<Face> faces;
+
 void setLightingAndShading()
 {
     glEnable(GL_LIGHTING);
@@ -62,28 +88,6 @@ void setLightingAndShading()
     glMaterialfv(GL_FRONT, GL_SPECULAR, specRef);
     glMateriali(GL_FRONT, GL_SHININESS, 128);
 }
-
-// Structure to hold vertex data
-struct Vertex
-{
-    float x, y, z;
-    float texU, texV; // Added texture coordinates
-    Vertex(float _x = 0, float _y = 0, float _z = 0, float _u = 0, float _v = 0)
-        : x(_x), y(_y), z(_z), texU(_u), texV(_v) {}
-};
-
-// Structure to hold face data
-struct Face
-{
-    std::vector<Vertex> vertices;
-};
-
-// Vector to store all faces
-std::vector<Face> faces;
-
-// Global variables for textures
-GLuint floorTexture;
-GLuint dinoTexture;
 
 GLuint loadTexture(const char *filename)
 {
@@ -135,7 +139,6 @@ Vertex parseVertex(const std::string &line)
     }
 
     // Calculate texture coordinates based on vertex position
-    // This is a simple mapping - you might want to adjust this based on your needs
     float texU = (values[0] + 5.0f) / 10.0f; // Map [-5,5] to [0,1]
     float texV = (values[2] + 5.0f) / 10.0f; // Map [-5,5] to [0,1]
 
@@ -182,7 +185,7 @@ void loadFacesFromFile(const char *filename)
     printf("Loaded %zu faces from file\n", faces.size());
 }
 
-// Draw a floor with a texture
+// Draw  floor with a texture
 void drawFloor()
 {
     glEnable(GL_TEXTURE_2D);
@@ -206,69 +209,13 @@ void drawFloor()
     glDisable(GL_TEXTURE_2D);
 }
 
-// Draw the dino model with a texture
-// void drawDino()
-// {
-//     glEnable(GL_TEXTURE_2D);
-//     // Bind the texture to the dino
-//     glBindTexture(GL_TEXTURE_2D, dinoTexture);
-
-//     glBegin(GL_QUADS);
-//     for (const Face &face : faces)
-//     {
-//         // Calculate face normal for lighting
-//         if (face.vertices.size() >= 3)
-//         {
-//             Vertex v1 = face.vertices[0];
-//             Vertex v2 = face.vertices[1];
-//             Vertex v3 = face.vertices[2];
-
-//             float ux = v2.x - v1.x;
-//             float uy = v2.y - v1.y;
-//             float uz = v2.z - v1.z;
-
-//             float vx = v3.x - v1.x;
-//             float vy = v3.y - v1.y;
-//             float vz = v3.z - v1.z;
-
-//             float nx = uy * vz - uz * vy;
-//             float ny = uz * vx - ux * vz;
-//             float nz = ux * vy - uy * vx;
-
-//             float length = sqrt(nx * nx + ny * ny + nz * nz);
-//             if (length > 0)
-//             {
-//                 nx /= length;
-//                 ny /= length;
-//                 nz /= length;
-//             }
-
-//             glNormal3f(nx, ny, nz);
-//         }
-
-//         // Draw vertices with texture coordinates
-//         for (const Vertex &vertex : face.vertices)
-//         {
-//             glTexCoord2f(vertex.texU, vertex.texV);
-//             glVertex3f(vertex.x, vertex.y, vertex.z);
-//         }
-//     }
-//     glEnd();
-//     glDisable(GL_TEXTURE_2D);
-// }
-
-// Add these global variables at the top of your file for animation
-float tailAngle = 0.0f;
-float headAngle = 0.0f;
-float animationSpeed = 2.0f; // Controls how fast the animation moves
-
-// Add this function to update animation angles
+//  animation angles update
 void updateAnimation()
 {
-    // Update tail swing using sine wave for smooth back and forth motion
+    // body swing
     tailAngle = 15.0f * sin(glutGet(GLUT_ELAPSED_TIME) * 0.001f * animationSpeed);
 
-    // Update head movement with a different frequency
+    // body swing 2
     headAngle = 10.0f * sin(glutGet(GLUT_ELAPSED_TIME) * 0.0007f * animationSpeed);
 }
 
@@ -283,9 +230,6 @@ void drawDino()
 
     glPushMatrix();
 
-    // Split faces into body parts based on their Y position
-    // We'll consider vertices above 75% of max height as head
-    // and vertices below 25% of max height as tail
     float maxY = -999999.0f;
     float minY = 999999.0f;
 
@@ -300,8 +244,8 @@ void drawDino()
     }
 
     float range = maxY - minY;
-    float headThreshold = maxY - (range * 0.25f); // Top 25% is head
-    float tailThreshold = minY + (range * 0.25f); // Bottom 25% is tail
+    float topBodyThreshold = maxY - (range * 0.25f);    // Top 25% body
+    float bottomBodyThreshold = minY + (range * 0.25f); // Bottom 25% body
 
     glBegin(GL_QUADS);
     for (const Face &face : faces)
@@ -350,20 +294,20 @@ void drawDino()
             float transformedY = vertex.y;
             float transformedZ = vertex.z;
 
-            if (vertex.y > headThreshold)
+            if (vertex.y > topBodyThreshold)
             {
                 // Head movement
-                float angle = headAngle * (vertex.y - headThreshold) / (maxY - headThreshold);
+                float angle = headAngle * (vertex.y - topBodyThreshold) / (maxY - topBodyThreshold);
                 float radians = angle * M_PI / 180.0f;
                 float newX = transformedX * cos(radians) - transformedZ * sin(radians);
                 float newZ = transformedX * sin(radians) + transformedZ * cos(radians);
                 transformedX = newX;
                 transformedZ = newZ;
             }
-            else if (vertex.y < tailThreshold)
+            else if (vertex.y < bottomBodyThreshold)
             {
                 // Tail movement
-                float angle = tailAngle * (tailThreshold - vertex.y) / (tailThreshold - minY);
+                float angle = tailAngle * (bottomBodyThreshold - vertex.y) / (bottomBodyThreshold - minY);
                 float radians = angle * M_PI / 180.0f;
                 float newX = transformedX * cos(radians) - transformedZ * sin(radians);
                 float newZ = transformedX * sin(radians) + transformedZ * cos(radians);
@@ -531,10 +475,7 @@ void display(void)
     drawDino();
     glPopMatrix();
 
-    drawFence();
-
-    drawTree();
-
+    // draw other objects( tree and fence)
     glPopMatrix();
     glutSwapBuffers();
 
