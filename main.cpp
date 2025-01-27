@@ -55,6 +55,37 @@ struct Face
 // Vector to store all faces
 std::vector<Face> faces;
 
+// Vertex data for the leaf faces
+GLfloat face1[4][3] = {
+    {-0.512071, -1.0, 0.254202},
+    {0.512071, -1.0, 0.254202},
+    {1.0, -0.009334, 0.487656},
+    {-1.0, -0.009334, 0.487656}};
+
+GLfloat face2[4][3] = {
+    {-1.0, -0.009334, 0.487656},
+    {1.0, -0.009334, 0.487656},
+    {0.748522, 1.011341, 0.242636},
+    {-0.748522, 1.011341, 0.242636}};
+
+GLfloat face3[4][3] = {
+    {-0.748522, 1.011341, 0.242636},
+    {0.748522, 1.011341, 0.242636},
+    {0.16307, 1.725813, 0.0},
+    {-0.185751, 1.725813, 0.0}};
+
+GLfloat face4[4][3] = {
+    {0.512071, -1.0, 0.254202},
+    {-0.512071, -1.0, 0.254202},
+    {-0.058127, -1.601064, 0.0},
+    {0.058127, -1.601064, 0.0}};
+
+GLfloat face5[4][3] = {
+    {0.058127, -1.601064, 0.0},
+    {-0.058127, -1.601064, 0.0},
+    {-0.114407, -2.417604, 0.0},
+    {0.114407, -2.417604, 0.0}};
+
 void setLightingAndShading()
 {
     glEnable(GL_LIGHTING);
@@ -364,7 +395,7 @@ void drawFenceSection()
     glPopMatrix();
 }
 
-void drawTree()
+void drawTreeType1()
 {
     // Draw the trunk
     glColor3f(0.5f, 0.35f, 0.05f);
@@ -385,6 +416,116 @@ void drawTree()
     // Reset color to white after drawing the tree
     glColor3f(1.0f, 1.0f, 1.0f);
 }
+
+void drawLeaf()
+{
+    glEnable(GL_TEXTURE_2D);
+    // glBindTexture(GL_TEXTURE_2D, leafTexture);
+    glColor3f(0.0f, 1.0f, 0.0f);
+    for (int i = 0; i < 20; i++)
+    { // Changed from 10 to 20
+        glPushMatrix();
+        // Distribute leaves in a more spherical pattern
+        float angle1 = (float)i * -18.0f;             // Adjusted angle to spread 20 leaves more evenly
+        float angle2 = (i % 2 == 0) ? 15.0f : -15.0f; // Vertical variation
+        glTranslatef(0.0f, 2.0f, 3.0f);               // Base position
+        // Rotate to distribute leaves
+        glRotatef(angle1, 0, 1, 0); // Horizontal rotation
+        // glRotatef(angle2, 1, 0, 0); // Vertical tilt
+        // Move leaf outward
+        glTranslatef(0.0f, 0.0f, 0.5f);
+        // Scale and orient leaf
+        glScalef(0.3f, 0.3f, 0.3f);
+        glRotatef(-270, 1, 0, 0);
+        // Draw the leaf
+        glBegin(GL_QUADS);
+        // Face 1
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3fv(face1[0]);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3fv(face1[1]);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3fv(face1[2]);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3fv(face1[3]);
+        // Face 2
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3fv(face2[0]);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3fv(face2[1]);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3fv(face2[2]);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3fv(face2[3]);
+        // Face 3
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3fv(face3[0]);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3fv(face3[1]);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3fv(face3[2]);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3fv(face3[3]);
+        // Face 4
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3fv(face4[0]);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3fv(face4[1]);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3fv(face4[2]);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3fv(face4[3]);
+        // Face 5
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3fv(face5[0]);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3fv(face5[1]);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3fv(face5[2]);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3fv(face5[3]);
+        glEnd();
+        glPopMatrix();
+    }
+    glDisable(GL_TEXTURE_2D);
+}
+
+// Function to draw the complete tree
+void drawTreeType2()
+{
+    // Draw the trunk
+    glColor3f(0.5f, 0.35f, 0.05f);
+    glPushMatrix();
+    glTranslatef(5.0f, -0.42f, 5.0f);
+    glRotatef(-90, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluNewQuadric(), 0.7, 0.5, 1.5, 5, 20);
+    glTranslatef(0, 0, 1.5);
+    gluCylinder(gluNewQuadric(), 0.5, 0.3, 1.5, 5, 20);
+    glTranslatef(0, 0, 1.5);
+    gluCylinder(gluNewQuadric(), 0.3, 0.01, 1.5, 5, 20);
+    glTranslatef(-0.1, -0.1, 0);
+    glRotatef(30, 1.0f, 0.0f, 0.0f);
+    gluCylinder(gluNewQuadric(), 0.2, 0.01, 1, 5, 20);
+    glRotatef(30, 0.0f, 1.0f, 0.0f);
+    glTranslatef(0, 0.4, 0.3);
+    gluCylinder(gluNewQuadric(), 0.1, 0.01, 1, 5, 20);
+
+    glPushMatrix();
+    glRotatef(90, 1.0f, 0.0f, 0.0f);
+    glTranslatef(0, -1.1, -2.8);
+    drawLeaf();
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotatef(20, 1.0f, 0.0f, 0.0f);
+    glTranslatef(-0.5, -1.0, -2);
+    glScalef(0.8, 0.8, 0.8);
+    drawLeaf();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
 void drawFence()
 {
     float fenceLength = 40.0f; // Length of one side of the floor
@@ -442,35 +583,30 @@ void display(void)
     glTranslatef(sceTX, sceTY, sceTZ);
     glRotatef(sceRY, 0.0, 1.0, 0.0);
 
-    // Draw the floor first
-    // glPushMatrix();
-    // glEnable(GL_TEXTURE_2D);
-    // glBindTexture(GL_TEXTURE_2D, floorTexture);
-
-    // // Set material properties for the floor
-    // GLfloat floorMaterial[] = {1.0, 1.0, 1.0, 1.0};
-    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, floorMaterial);
-
-    // glBegin(GL_QUADS);
-    // glNormal3f(0.0, 1.0, 0.0); // Normal pointing up for proper lighting
-    // glTexCoord2f(0.0, 0.0);
-    // glVertex3f(-20.0, -0.4, 20.0);
-    // glTexCoord2f(0.0, 1.0);
-    // glVertex3f(-20.0, -0.4, -20.0);
-    // glTexCoord2f(1.0, 1.0);
-    // glVertex3f(20.0, -0.4, -20.0);
-    // glTexCoord2f(1.0, 0.0);
-    // glVertex3f(20.0, -0.4, 20.0);
-    // glEnd();
-    // glPopMatrix();
-
     drawFloor();
+
+    drawFence();
+
+    drawTreeType1();
+
+    drawTreeType2();
 
     // Draw the dino
     glPushMatrix();
     glTranslatef(objTX, objTY + 1.5, objTZ);
     glRotatef(objRY, 0.0, 1.0, 0.0);
     glRotatef(-90, 1.0, 0.0, 0.0);
+    glColor3f(1.0, 1.0, 1.0);
+    drawDino();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(10.0, -1.0, 10.0);
+    glTranslatef(objTX, objTY + 1.5, objTZ);
+    glRotatef(objRY, 0.0, 1.0, 0.0);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(180, 0.0, 0.0, 1.0);
+    glScalef(0.5, 0.5, 0.5);
     glColor3f(1.0, 1.0, 1.0);
     drawDino();
     glPopMatrix();
@@ -497,7 +633,7 @@ void init(void)
 
     // Load textures
     floorTexture = loadTexture("ground.png");
-    dinoTexture = loadTexture("dino-texture2.jpg");
+    dinoTexture = loadTexture("dino-skin3.jpg");
 
     // Verify texture loading
     if (!floorTexture || !dinoTexture)
@@ -595,6 +731,7 @@ void reshape(GLsizei w, GLsizei h)
     // Define the Perspective projection frustum
     //  (FOV_in_vertical, aspect_ratio, z-distance to the near plane from the camera position, z-distance to far plane from the camera position)
     gluPerspective(120.0, aspect_ratio, 1.0, 100.0);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 int main(int argc, char **argv)
@@ -612,4 +749,3 @@ int main(int argc, char **argv)
     glutMainLoop();
     return 0;
 }
-
