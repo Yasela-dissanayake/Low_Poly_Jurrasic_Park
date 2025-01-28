@@ -491,7 +491,7 @@ void drawDisk()
 void drawPyramid(float baseSize, float height)
 {
     float halfBase = baseSize / 2.0f;
-
+    glPushMatrix();
     glBegin(GL_TRIANGLES);
     // Front face
     glVertex3f(0.0f, height, 0.0f);
@@ -521,6 +521,8 @@ void drawPyramid(float baseSize, float height)
     glVertex3f(halfBase, 0.0f, -halfBase);
     glVertex3f(-halfBase, 0.0f, -halfBase);
     glEnd();
+
+    glPopMatrix();
 }
 
 void pileWithBevels(float height, float width, float bevel)
@@ -662,7 +664,7 @@ void pileWithBevels(float height, float width, float bevel)
 //-------------------Floor with Texture-------------------
 void drawFloor()
 {
-
+    glPushMatrix();
     glEnable(GL_TEXTURE_2D);
     // Reset color to white before drawing the textured floor
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -682,6 +684,7 @@ void drawFloor()
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
 }
 
 //-------------------Draw Tree Trunk-------------------
@@ -907,6 +910,33 @@ void drawDoorPile(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 
     glPopMatrix();
 }
 
+void doorWing()
+{
+    woodTexture = loadTexture("wood.png");
+    logoTexture = loadTexture("logo.png");
+    doorTexture = loadTexture("door.png");
+    doorrTexture = loadTexture("doorr.png");
+
+    glPushMatrix();
+    glRotatef(50, 0, 1, 0);
+    glTranslatef(0.4, 1, 0);
+    glScalef(3, 1, 0.1);
+    drawCubeWithTexture(doorTexture, doorTexture, 2, 0.5); //
+    glPopMatrix();
+}
+
+void gate(float x = 0.0f, float y = 0.0f, float z = 0.0f, float angle = 0.0f)
+{
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    glRotatef(angle, 0, 1, 0);
+    doorWing();
+    glTranslatef(1.6, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    doorWing();
+    glPopMatrix();
+}
+
 //-------------------Draw Door-------------------
 void drawDoor(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
 {
@@ -934,36 +964,137 @@ void drawDoor(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f
 
     // Logo banner
     glPushMatrix();
-    glScalef(1, 0.3, 4.5);
+    glScalef(1, 0.3, 4.3);
     glTranslatef(0, 10, 0.4);
     drawCubeWithTexture(woodTexture, logoTexture, 2, 0.5);
     glPopMatrix();
 
-    // Left Door
+    gate(0, 0, 0.5, -90);
+
+    glPopMatrix();
+}
+
+// Draw one section of the fence
+void drawFenceSection()
+{
+    // Draw two vertical posts
     glPushMatrix();
-    glScalef(0.1, 3, 1);
-    glTranslatef(0, 0.4, 1.1);
-    drawCubeWithTexture(woodTexture, doorTexture, 0.8, 1.25);
+
+    // draw post
+    glPushMatrix();
+    glColor3f(0.5f, 0.35f, 0.05f);  // Brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(0.1f, 5.0f, 0.1f);     // Scale to make it a thin vertical post, height increased 5 times
+    glutSolidCube(1.0f);
     glPopMatrix();
 
-    // Right Door
+    glTranslatef(1.0f, 0.0f, 0.0f);
+
+    // draw post
     glPushMatrix();
-    glScalef(0.1, 3, 1);
-    glTranslatef(0, 0.4, 2.4);
-    drawCubeWithTexture(woodTexture, doorTexture, 0.8, 1.25);
+    glColor3f(0.5f, 0.35f, 0.05f);  // Brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(0.1f, 5.0f, 0.1f);     // Scale to make it a thin vertical post, height increased 5 times
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    // Draw two horizontal planks
+    glPushMatrix();
+
+    // plank
+    glPushMatrix();
+    glColor3f(0.65f, 0.5f, 0.35f);  // Light brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(1.0f, 0.1f, 0.1f);     // Scale to make it a horizontal plank
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+    glTranslatef(0.0f, -2.5f, 0.0f); // Adjust the position of the second plank
+
+    // plank
+    glPushMatrix();
+    glColor3f(0.65f, 0.5f, 0.35f);  // Light brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(1.0f, 0.1f, 0.1f);     // Scale to make it a horizontal plank
+    glutSolidCube(1.0f);
     glPopMatrix();
 
     glPopMatrix();
 }
 
+// Daw fence
+void drawFence()
+{
+    float fenceLength = 40.0f; // Length of one side of the floor
+    int numSections = 40;      // Number of fence sections per side
+    float sectionSpacing = fenceLength / numSections;
+
+    // Draw right side
+    for (int i = 0; i <= numSections-2; i++)
+    {
+        glPushMatrix();
+        glTranslatef(-20.0f + i * sectionSpacing, -0.4f, 20.0f); // Adjust to align with the floor level
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw left side
+    for (int i = 0; i <= numSections-2; i++)
+    {
+        glPushMatrix();
+        glTranslatef(-20.0f + i * sectionSpacing, -0.4f, -20.0f); // Adjust to align with the floor level
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw front side1
+    for (int i = 0; i <= ((numSections / 2) - 2); i++)
+    {
+        glPushMatrix();
+        glTranslatef(-19.0f, -0.4f, -20.0f + i * sectionSpacing); // Adjust to align with the floor level
+        glRotatef(90, 0.0f, 1.0f, 0.0f);
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw front side2
+    for (int i = ((numSections / 2) + 2); i <= (numSections); i++)
+    {
+        glPushMatrix();
+        glTranslatef(-19.0f, -0.4f, -20.0f + i * sectionSpacing); // Adjust to align with the floor level
+        glRotatef(90, 0.0f, 1.0f, 0.0f);
+        drawFenceSection();
+        glPopMatrix();
+    }
+
+    // Draw back side
+    for (int i = 0; i <= numSections; i++)
+    {
+        glPushMatrix();
+        glTranslatef(20.0f, -0.4f, -20.0f + i * sectionSpacing); // Adjust to align with the floor level
+        glRotatef(90, 0.0f, 1.0f, 0.0f);
+        drawFenceSection();
+        glPopMatrix();
+    }
+}
+
 //------------Draw Scene---------------------------------
 void drawScene()
 {
+    glPushMatrix();
     drawFloor();
+    glPopMatrix();
 
-    drawForest();
+    // drawForest();
+    glPushMatrix();
+    drawFence();
+    glPopMatrix();
 
-    drawDoor(-19, 0, 0, 1);
+    glPushMatrix();
+    drawDoor(-19, 0, -2, 1);
+    glPopMatrix();
 
     glColor3f(1, 1, 1);
     // drawUndergroundStation();

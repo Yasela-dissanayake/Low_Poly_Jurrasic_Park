@@ -382,16 +382,48 @@ void drawFenceSection()
 {
     // Draw two vertical posts
     glPushMatrix();
-    drawFencePost();
+
+    // draw post
+    glPushMatrix();
+    glColor3f(0.5f, 0.35f, 0.05f);  // Brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(0.1f, 5.0f, 0.1f);     // Scale to make it a thin vertical post, height increased 5 times
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
     glTranslatef(1.0f, 0.0f, 0.0f);
-    drawFencePost();
+
+    // draw post
+    glPushMatrix();
+    glColor3f(0.5f, 0.35f, 0.05f);  // Brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(0.1f, 5.0f, 0.1f);     // Scale to make it a thin vertical post, height increased 5 times
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
     glPopMatrix();
 
     // Draw two horizontal planks
     glPushMatrix();
-    drawPlank();
+
+    // plank
+    glPushMatrix();
+    glColor3f(0.65f, 0.5f, 0.35f);  // Light brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(1.0f, 0.1f, 0.1f);     // Scale to make it a horizontal plank
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
     glTranslatef(0.0f, -2.5f, 0.0f); // Adjust the position of the second plank
-    drawPlank();
+
+    // plank
+    glPushMatrix();
+    glColor3f(0.65f, 0.5f, 0.35f);  // Light brown color
+    glTranslatef(0.0f, 2.1f, 0.0f); // Adjust to align with the floor level
+    glScalef(1.0f, 0.1f, 0.1f);     // Scale to make it a horizontal plank
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
     glPopMatrix();
 }
 
