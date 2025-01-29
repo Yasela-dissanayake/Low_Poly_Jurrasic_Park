@@ -79,6 +79,9 @@ GLuint doorTexture;
 GLuint doorrTexture;
 GLuint logoTexture;
 GLuint woodTexture;
+GLuint dinoTexture;
+
+float gateAngle = 0.0f;
 
 // save normals
 std::tuple<float, float, float> normal;
@@ -294,53 +297,6 @@ void drawClosedCylinder()
     glPopMatrix();
 }
 
-// void drawCube(float width, float height, float depth)
-// {
-//     float halfWidth = width / 2.0f;
-//     float halfHeight = height / 2.0f;
-//     float halfDepth = depth / 2.0f;
-
-//     glBegin(GL_QUADS);
-
-//     // Front face
-//     glVertex3f(-halfWidth, -halfHeight, halfDepth);
-//     glVertex3f(halfWidth, -halfHeight, halfDepth);
-//     glVertex3f(halfWidth, halfHeight, halfDepth);
-//     glVertex3f(-halfWidth, halfHeight, halfDepth);
-
-//     // Back face
-//     glVertex3f(-halfWidth, -halfHeight, -halfDepth);
-//     glVertex3f(-halfWidth, halfHeight, -halfDepth);
-//     glVertex3f(halfWidth, halfHeight, -halfDepth);
-//     glVertex3f(halfWidth, -halfHeight, -halfDepth);
-
-//     // Left face
-//     glVertex3f(-halfWidth, -halfHeight, -halfDepth);
-//     glVertex3f(-halfWidth, -halfHeight, halfDepth);
-//     glVertex3f(-halfWidth, halfHeight, halfDepth);
-//     glVertex3f(-halfWidth, halfHeight, -halfDepth);
-
-//     // Right face
-//     glVertex3f(halfWidth, -halfHeight, -halfDepth);
-//     glVertex3f(halfWidth, halfHeight, -halfDepth);
-//     glVertex3f(halfWidth, halfHeight, halfDepth);
-//     glVertex3f(halfWidth, -halfHeight, halfDepth);
-
-//     // Top face
-//     glVertex3f(-halfWidth, halfHeight, -halfDepth);
-//     glVertex3f(-halfWidth, halfHeight, halfDepth);
-//     glVertex3f(halfWidth, halfHeight, halfDepth);
-//     glVertex3f(halfWidth, halfHeight, -halfDepth);
-
-//     // Bottom face
-//     glVertex3f(-halfWidth, -halfHeight, -halfDepth);
-//     glVertex3f(halfWidth, -halfHeight, -halfDepth);
-//     glVertex3f(halfWidth, -halfHeight, halfDepth);
-//     glVertex3f(-halfWidth, -halfHeight, halfDepth);
-
-//     glEnd();
-// }
-
 void drawCubeWithTexture(GLuint texture, GLuint texture_front, float height, float width)
 {
     glEnable(GL_TEXTURE_2D);
@@ -351,7 +307,7 @@ void drawCubeWithTexture(GLuint texture, GLuint texture_front, float height, flo
     float halfWidth = width / 2.0f;
 
     // Front Face
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture_front);
     glBegin(GL_QUADS);
     {
         auto normal = calculateNormal(
@@ -692,7 +648,7 @@ void drawTreeTrunk()
 {
 
     // glColor3f(0.49019f, 0.36078f, 0.23921f);
-    glColor3f(0.5f, 0.35f, 0.05f);
+    // glColor3f(0.5f, 0.35f, 0.05f);
     glPushMatrix();
 
     glScalef(1, 1.5, 1);
@@ -775,7 +731,7 @@ void drawRegularTree(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale
 //-------------------Floor with multiple tree types-------------------
 void drawForest()
 {
-    srand(42);
+    srand(40);
     // srand(static_cast<unsigned int>(time(0))); // Use current time as seed for randomness
 
     for (int i = 0; i < 40; ++i)
@@ -799,12 +755,17 @@ void drawForest()
 }
 
 //-------------------Door pile Pyramid-------------------
-void doorPilePyramid(GLuint texture, float height, float half_top_width, float half_bottom_width)
+void doorPilePyramid(float height, float half_top_width, float half_bottom_width, GLuint texture, GLuint texture_f)
 {
     glPushMatrix();
+    glEnable(GL_TEXTURE_2D);
+    // Enable 2D texturing
+    // glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
+
     glBegin(GL_QUADS);
+
+    glBindTexture(GL_TEXTURE_2D, texture_f); // Bind the texture
     // Front Face
-    glBindTexture(GL_TEXTURE_2D, texture);
     normal = calculateNormal(
         {-half_bottom_width, 0.0f, half_bottom_width},
         {half_bottom_width, 0.0f, half_bottom_width},
@@ -820,13 +781,13 @@ void doorPilePyramid(GLuint texture, float height, float half_top_width, float h
     glVertex3f(-half_top_width, height, half_top_width);
 
     // Back Face
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
     normal = calculateNormal(
         {-half_bottom_width, 0.0f, -half_bottom_width},
         {half_bottom_width, 0.0f, -half_bottom_width},
         {half_top_width, height, -half_top_width});
     glNormal3f(std::get<0>(normal), std::get<1>(normal), std::get<2>(normal));
-
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(-half_bottom_width, 0.0f, -half_bottom_width);
     glTexCoord2f(1.0f, 0.0f);
     glVertex3f(half_bottom_width, 0.0f, -half_bottom_width);
@@ -836,7 +797,7 @@ void doorPilePyramid(GLuint texture, float height, float half_top_width, float h
     glVertex3f(-half_top_width, height, -half_top_width);
 
     // Top Face
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
     normal = calculateNormal(
         {-half_top_width, height, -half_top_width},
         {-half_top_width, height, half_top_width},
@@ -852,7 +813,7 @@ void doorPilePyramid(GLuint texture, float height, float half_top_width, float h
     glVertex3f(half_top_width, height, -half_top_width);
 
     // Bottom Face
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
     normal = calculateNormal(
         {-half_bottom_width, 0.0f, -half_bottom_width},
         {half_bottom_width, 0.0f, -half_bottom_width},
@@ -868,19 +829,23 @@ void doorPilePyramid(GLuint texture, float height, float half_top_width, float h
     glVertex3f(-half_bottom_width, 0.0f, half_bottom_width);
 
     // Right Face
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
     normal = calculateNormal(
         {half_bottom_width, 0.0f, -half_bottom_width},
         {half_top_width, height, -half_top_width},
         {half_top_width, height, half_top_width});
     glNormal3f(std::get<0>(normal), std::get<1>(normal), std::get<2>(normal));
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3f(half_bottom_width, 0.0f, -half_bottom_width);
+    glTexCoord2f(1.0f, 0.0f);
     glVertex3f(half_top_width, height, -half_top_width);
+    glTexCoord2f(1.0f, 1.0f);
     glVertex3f(half_top_width, height, half_top_width);
+    glTexCoord2f(0.0f, 1.0f);
     glVertex3f(half_bottom_width, 0.0f, half_bottom_width);
 
     // Left Face
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // Bind the texture
     normal = calculateNormal(
         {-half_bottom_width, 0.0f, -half_bottom_width},
         {-half_bottom_width, 0.0f, half_bottom_width},
@@ -896,6 +861,7 @@ void doorPilePyramid(GLuint texture, float height, float half_top_width, float h
     glVertex3f(-half_top_width, height, -half_top_width);
 
     glEnd();
+    glDisable(GL_TEXTURE_2D); // Disable texturing
     glPopMatrix();
 }
 
@@ -904,73 +870,9 @@ void drawDoorPile(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 
 {
     glPushMatrix();
     woodTexture = loadTexture("wood.png");
-    glColor3f(0.6f, 0.3f, 0.0f); // Brown color
+    // glColor3f(0.6f, 0.3f, 0.0f); // Brown color
     glScalef(1, scale, 1);
-    doorPilePyramid(woodTexture, 2, 0.10, 0.4);
-    glPopMatrix();
-}
-
-void doorWing()
-{
-    woodTexture = loadTexture("wood.png");
-    logoTexture = loadTexture("logo.png");
-    doorTexture = loadTexture("door.png");
-    doorrTexture = loadTexture("doorr.png");
-
-    glPushMatrix();
-    glRotatef(50, 0, 1, 0);
-    glTranslatef(0.4, 1, 0);
-    glScalef(3, 1, 0.1);
-    drawCubeWithTexture(doorTexture, doorTexture, 2, 0.5); //
-    glPopMatrix();
-}
-
-void gate(float x = 0.0f, float y = 0.0f, float z = 0.0f, float angle = 0.0f)
-{
-    glPushMatrix();
-    glTranslatef(x, y, z);
-    glRotatef(angle, 0, 1, 0);
-    doorWing();
-    glTranslatef(1.6, 0, 0);
-    glRotatef(80, 0, 1, 0);
-    doorWing();
-    glPopMatrix();
-}
-
-//-------------------Draw Door-------------------
-void drawDoor(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
-{
-    woodTexture = loadTexture("wood.png");
-    logoTexture = loadTexture("logo.png");
-    doorTexture = loadTexture("door.png");
-    doorrTexture = loadTexture("doorr.png");
-
-    glPushMatrix();
-    glTranslatef(x, y, z);
-    glScalef(scale, scale, scale);
-
-    // Pile 1
-    glPushMatrix();
-    glRotatef(15, 1, 0, 0);
-    drawDoorPile(0, 0, 0, 1.8);
-    glPopMatrix();
-
-    // Pile 2
-    glPushMatrix();
-    glTranslatef(0, 0, 3.5);
-    glRotatef(-15, 1, 0, 0);
-    drawDoorPile(0, 0, 0, 1.8);
-    glPopMatrix();
-
-    // Logo banner
-    glPushMatrix();
-    glScalef(1, 0.3, 4.3);
-    glTranslatef(0, 10, 0.4);
-    drawCubeWithTexture(woodTexture, logoTexture, 2, 0.5);
-    glPopMatrix();
-
-    gate(0, 0, 0.5, -90);
-
+    doorPilePyramid(2, 0.10, 0.4, woodTexture, woodTexture);
     glPopMatrix();
 }
 
@@ -1032,7 +934,7 @@ void drawFence()
     float sectionSpacing = fenceLength / numSections;
 
     // Draw right side
-    for (int i = 0; i <= numSections-2; i++)
+    for (int i = 0; i <= numSections - 2; i++)
     {
         glPushMatrix();
         glTranslatef(-20.0f + i * sectionSpacing, -0.4f, 20.0f); // Adjust to align with the floor level
@@ -1041,7 +943,7 @@ void drawFence()
     }
 
     // Draw left side
-    for (int i = 0; i <= numSections-2; i++)
+    for (int i = 0; i <= numSections - 2; i++)
     {
         glPushMatrix();
         glTranslatef(-20.0f + i * sectionSpacing, -0.4f, -20.0f); // Adjust to align with the floor level
@@ -1060,7 +962,7 @@ void drawFence()
     }
 
     // Draw front side2
-    for (int i = ((numSections / 2) + 2); i <= (numSections); i++)
+    for (int i = ((numSections / 2) + 3); i <= (numSections); i++)
     {
         glPushMatrix();
         glTranslatef(-19.0f, -0.4f, -20.0f + i * sectionSpacing); // Adjust to align with the floor level
@@ -1080,6 +982,282 @@ void drawFence()
     }
 }
 
+// Draw foot
+void drawFoot(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
+
+{
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    // glTranslatef(-0.2, 0.05, 0);
+    glRotatef(90, 0, 0, 1);
+
+    glPushMatrix();
+    glTranslatef(0, 0, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0, 0.3);
+    glRotatef(25, 1, 0, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
+    // glTranslatef(-0.2, 0.05, 0);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0, -0.3);
+    glRotatef(-25, 1, 0, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
+    // glTranslatef(-0.2, 0.05, 0);
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+// prism
+void drawPrism(float base, float height, float depth)
+{
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+
+    // Front face (triangle)
+    glVertex3f(-base / 2, 0.0f, depth / 2);
+    glVertex3f(base / 2, 0.0f, depth / 2);
+    glVertex3f(0.0f, height, depth / 2);
+
+    // Back face (triangle)
+    glVertex3f(-base / 2, 0.0f, -depth / 2);
+    glVertex3f(base / 2, 0.0f, -depth / 2);
+    glVertex3f(0.0f, height, -depth / 2);
+
+    glEnd();
+    glBegin(GL_QUADS);
+
+    // Bottom face (rectangle)
+    glVertex3f(-base / 2, 0.0f, depth / 2);
+    glVertex3f(base / 2, 0.0f, depth / 2);
+    glVertex3f(base / 2, 0.0f, -depth / 2);
+    glVertex3f(-base / 2, 0.0f, -depth / 2);
+
+    // Left face (rectangle)
+    glVertex3f(-base / 2, 0.0f, depth / 2);
+    glVertex3f(0.0f, height, depth / 2);
+    glVertex3f(0.0f, height, -depth / 2);
+    glVertex3f(-base / 2, 0.0f, -depth / 2);
+
+    // Right face (rectangle)
+    glVertex3f(base / 2, 0.0f, depth / 2);
+    glVertex3f(0.0f, height, depth / 2);
+    glVertex3f(0.0f, height, -depth / 2);
+    glVertex3f(base / 2, 0.0f, -depth / 2);
+
+    glEnd();
+    glPopMatrix();
+}
+
+void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
+{
+    glPushMatrix();
+    // glTranslatef(x, y, z);
+    glScalef(scale, scale, scale);
+    for (int i = 0; i < 6; i++)
+    {
+        drawPrism(0.8, 1, 0.8);
+        glTranslatef(0, 0, 1.05);
+    }
+    glPopMatrix();
+}
+
+// Draw dino 1
+void drawDino(float scale = 1.0f)
+{
+    dinoTexture = loadTexture("dino1-skin1.png");
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glPushMatrix();
+    // glTranslatef(x, y, z);
+    glScalef(scale, scale, scale);
+
+    // left leg
+    glPushMatrix();
+
+    doorPilePyramid(1.5, 0.3, 0.15, dinoTexture, dinoTexture);
+    glTranslatef(0, 1.5, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.6);
+    glPopMatrix();
+
+    // right leg
+    glPushMatrix();
+    glTranslatef(0, 0, 1);
+    doorPilePyramid(1.5, 0.3, 0.15, dinoTexture, dinoTexture);
+    glTranslatef(0, 1.5, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.6);
+    glPopMatrix();
+
+    // middle body1
+    glPushMatrix();
+    glTranslatef(0, 0, 0.5);
+    glRotatef(90, 0, 0, 1);
+    glTranslatef(2, -1, 0);
+    doorPilePyramid(1.5, 0.5, 0.3, dinoTexture, dinoTexture);
+    glPopMatrix();
+
+    // middle body2
+    glPushMatrix();
+    glTranslatef(-0.7, 2, 0.5);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 1, 1);
+    glPopMatrix();
+
+    // tail part1
+    glPushMatrix();
+    glTranslatef(1, 0, 0.5);
+    glRotatef(90, 0, 0, 1);
+    glTranslatef(1.8, -0.8, 0);
+    glRotatef(-20, 0, 0, 1);
+    doorPilePyramid(1, 0.2, 0.1, dinoTexture, dinoTexture);
+    glPopMatrix();
+
+    // tail part2
+    glPushMatrix();
+    glTranslatef(2, 0, 0.5);
+    glRotatef(90, 0, 0, 1);
+    glTranslatef(1.45, -0.7, 0);
+    glRotatef(-20, 0, 0, 1);
+    doorPilePyramid(1, 0.06, 0.03, dinoTexture, dinoTexture);
+    glPopMatrix();
+
+    // neck part1
+    glPushMatrix();
+    glRotatef(-150, 0, 0, 1);
+    glTranslatef(-0.5, -3.5, 0.5);
+    doorPilePyramid(1.5, 0.5, 0.3, dinoTexture, dinoTexture);
+    glPopMatrix();
+
+    // head
+    glPushMatrix();
+    glTranslatef(-2, 3.2, 0.5);
+    glRotatef(-90, 0, 0, 1);
+    doorPilePyramid(1, 0.3, 0.15, dinoTexture, dinoTexture);
+    glPopMatrix();
+
+    // hand1
+    glPushMatrix();
+    glTranslatef(-1, 2, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.25, 0.25);
+    glTranslatef(-0.5, 0, 0);
+    glRotatef(90, 0, 0, 1);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.8, 0.125);
+    glPopMatrix();
+
+    // hand2
+    glPushMatrix();
+    glTranslatef(-1, 2, 1);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.25, 0.25);
+    glTranslatef(-0.5, 0, 0);
+    glRotatef(90, 0, 0, 1);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.8, 0.125);
+    glPopMatrix();
+
+    // foot 1
+    drawFoot(-0.2, 0.05, 0);
+
+    // foot 2
+    drawFoot(-0.2, 0.05, 1);
+
+    // left eye
+    GLUquadric *quad = gluNewQuadric();
+    glPushMatrix();
+    glTranslatef(-1.5, 3.25, 0.3);
+    gluSphere(quad, 0.06, 32, 32);
+    glColor3f(0, 0, 0);
+    glTranslatef(0, -0.02, -0.01);
+    gluSphere(quad, 0.05, 32, 32);
+    glPopMatrix();
+
+    // right eye
+    glPushMatrix();
+    glColor3f(1, 1, 1);
+    glTranslatef(-1.5, 3.25, 0.7);
+    gluSphere(quad, 0.06, 32, 32);
+    glColor3f(0, 0, 0);
+    glTranslatef(0, -0.02, 0.018);
+    gluSphere(quad, 0.05, 32, 32);
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void banner()
+{
+    woodTexture = loadTexture("wood.png");
+    glPushMatrix();
+    glScalef(1, 1, 0.15);
+    doorPilePyramid(0.3, 0.8, 0.8, woodTexture, woodTexture);
+
+    glPushMatrix();
+    logoTexture = loadTexture("logo.png");
+    glTranslatef(0, 0.15, 0.5);
+    glScalef(0.8,0.9, 1.2);
+    drawCubeWithTexture(woodTexture, logoTexture, 0.3, 0.8);
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void doorWing()
+{
+    doorTexture = loadTexture("door.png");
+    glPushMatrix();
+    glRotatef(gateAngle, 0, 1, 0);
+    glTranslatef(0.4, 0, 0);
+    glScalef(1, 1, 0.1);
+    doorPilePyramid(1.25, 0.4, 0.4, doorTexture, doorTexture);
+    glPopMatrix();
+}
+
+void gateFrameTower()
+{
+    woodTexture = loadTexture("wood.png");
+    glPushMatrix();
+    glTranslatef(-0.2, 0, 0);
+    glRotatef(-5.5, 0, 0, 1);
+    doorPilePyramid(2.1, 0.125, 0.25, woodTexture, woodTexture);
+    glPopMatrix();
+}
+
+void gateFrame()
+{
+
+    glPushMatrix();
+    gateFrameTower();
+    glTranslatef(1.6, 0, 0);
+    glRotatef(180, 0, 1, 0);
+    gateFrameTower();
+    glPopMatrix();
+}
+
+void gate(float scale = 1.0f)
+{
+
+    glPushMatrix();
+    glScalef(scale, scale, scale);
+    // banner
+    glPushMatrix();
+    glTranslatef(0.8, 1.7, 0);
+    banner();
+    glPopMatrix();
+    // FRAME
+    gateFrame();
+    // DOORS
+    glPushMatrix();
+    doorWing();
+    glTranslatef(1.6, 0, 0);
+    glRotatef(180, 0, 1, 0);
+    glScalef(1, 1, -1);
+    doorWing();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
 //------------Draw Scene---------------------------------
 void drawScene()
 {
@@ -1087,17 +1265,24 @@ void drawScene()
     drawFloor();
     glPopMatrix();
 
-    // drawForest();
+    drawForest();
     glPushMatrix();
     drawFence();
     glPopMatrix();
 
     glPushMatrix();
-    drawDoor(-19, 0, -2, 1);
+    // drawDoor(-19, 0, 0, 1);
+    glTranslatef(-19, 0, -1.5);
+    glRotatef(270, 0, 1, 0);
+    gate(1.8);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(5, 0, 2);
+    drawDino(1);
     glPopMatrix();
 
     glColor3f(1, 1, 1);
-    // drawUndergroundStation();
 }
 
 void display(void)
@@ -1316,6 +1501,12 @@ void keyboard(unsigned char key, int x, int y)
         break;
     case 'x':
         showAxes = !showAxes; // Toggle axes visibility
+        break;
+    case 'o':
+        gateAngle += gateAngle >= 80 ? 0 : 1;
+        break;
+    case 'O':
+        gateAngle -= gateAngle <= 0 ? 0 : 1;
         break;
     }
     glutPostRedisplay();
