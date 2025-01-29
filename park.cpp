@@ -86,10 +86,12 @@ GLuint woodTexture;
 GLuint dinoTexture;
 GLuint dino2Texture;
 GLuint rhinoTexture;
+GLuint hdrTexture;
 
 float gateAngle = 0.0f;
 float tailAngle = 0.0f;
 float headAngle = 0.0f;
+float cloud_animation = 0.0f;
 float animationSpeed = 2.0f; // Controls how fast the animation moves
 
 struct Vertex
@@ -335,7 +337,7 @@ void init(void)
     // Enable smooth shading
     glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    floorTexture = loadTexture("ground.png");
+    floorTexture = loadTexture("floor3.png");
     dino2Texture = loadTexture("dino-texture2.jpg");
 
     // Load the faces from file
@@ -1137,37 +1139,6 @@ void drawFence()
     }
 }
 
-// Draw foot
-void drawFoot(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
-
-{
-    glPushMatrix();
-    glTranslatef(x, y, z);
-    // glTranslatef(-0.2, 0.05, 0);
-    glRotatef(90, 0, 0, 1);
-
-    glPushMatrix();
-    glTranslatef(0, 0, 0);
-    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 0, 0.3);
-    glRotatef(25, 1, 0, 0);
-    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
-    // glTranslatef(-0.2, 0.05, 0);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 0, -0.3);
-    glRotatef(-25, 1, 0, 0);
-    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
-    // glTranslatef(-0.2, 0.05, 0);
-    glPopMatrix();
-
-    glPopMatrix();
-}
-
 void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
 {
     glPushMatrix();
@@ -1194,6 +1165,142 @@ void drawEye()
 
     gluDeleteQuadric(quad);
 }
+
+void drawHorn()
+{
+    glPushMatrix();
+    glColor3f(1, 1, 1);
+    drawPyramid(0.15, 0.35);
+    glPopMatrix();
+}
+
+void drawNails()
+{
+
+    glPushMatrix();
+    glPushMatrix();
+    glTranslatef(0.1, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.1, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+// draw dino 3 leg
+void drawLeg3()
+{
+    rhinoTexture = loadTexture("rhino.png");
+    glColor3f(0.51, 0.77, 0.45);
+
+    glPushMatrix();
+    glTranslatef(0.18, -1, 0.5);
+    doorPilePyramid(0.7, 0.13, 0.08, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.18, -1, 0.5);
+    doorPilePyramid(0.3, 0.08, 0.16, rhinoTexture, rhinoTexture);
+
+    glPushMatrix();
+    drawNails();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void drawThorns()
+{
+    glPushMatrix();
+    glScalef(1, 0.3, 1);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.14, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glScalef(0.8, 0.8, 0.8);
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glScalef(0.8, 0.8, 0.8);
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.35, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.4, -0.2);
+    drawHorn();
+    glPopMatrix();
+}
+
+// Draw foot
+void drawFoot(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
+
+{
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    // glTranslatef(-0.2, 0.05, 0);
+    glRotatef(90, 0, 0, 1);
+
+    glPushMatrix();
+    glTranslatef(0, 0, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
+    glPushMatrix();
+    glScalef(1, 0.3, 1);
+    glTranslatef(0, 1, 0);
+    drawHorn();
+    glPopMatrix();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0, 0.3);
+    glRotatef(25, 1, 0, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
+
+    glPushMatrix();
+    glScalef(1, 0.3, 1);
+    glTranslatef(0, 1, 0);
+    drawHorn();
+    glPopMatrix();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0, -0.3);
+    glRotatef(-25, 1, 0, 0);
+    drawCubeWithTexture(dinoTexture, dinoTexture, 0.6, 0.115);
+    glPushMatrix();
+    glScalef(1, 0.3, 1);
+    glTranslatef(0, 1, 0);
+    drawHorn();
+    glPopMatrix();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
 // Draw dino 1
 void drawDino(float scale = 1.0f)
 {
@@ -1413,96 +1520,6 @@ void drawDino2()
     glDisable(GL_TEXTURE_2D);
 }
 
-void drawHorn()
-{
-    glPushMatrix();
-    glColor3f(1, 1, 1);
-    drawPyramid(0.15, 0.35);
-    glPopMatrix();
-}
-
-void drawNails()
-{
-
-    glPushMatrix();
-    glPushMatrix();
-    glTranslatef(0.1, 0.02, 0.1);
-    glRotatef(90, 1, 0, 0);
-    glScalef(0.5, 0.5, 0.5);
-    drawHorn();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 0.02, 0.1);
-    glRotatef(90, 1, 0, 0);
-    glScalef(0.5, 0.5, 0.5);
-    drawHorn();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(-0.1, 0.02, 0.1);
-    glRotatef(90, 1, 0, 0);
-    glScalef(0.5, 0.5, 0.5);
-    drawHorn();
-    glPopMatrix();
-
-    glPopMatrix();
-}
-
-// draw dino 3 leg
-void drawLeg3()
-{
-    rhinoTexture = loadTexture("rhino.png");
-    glColor3f(0.51, 0.77, 0.45);
-
-    glPushMatrix();
-    glTranslatef(0.18, -1, 0.5);
-    doorPilePyramid(0.7, 0.13, 0.08, rhinoTexture, rhinoTexture);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.18, -1, 0.5);
-    doorPilePyramid(0.3, 0.08, 0.16, rhinoTexture, rhinoTexture);
-
-    glPushMatrix();
-    drawNails();
-    glPopMatrix();
-
-    glPopMatrix();
-}
-
-void drawThorns()
-{
-    glPushMatrix();
-    glScalef(1, 0.3, 1);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.14, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glScalef(0.8, 0.8, 0.8);
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glScalef(0.8, 0.8, 0.8);
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.35, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.4, -0.2);
-    drawHorn();
-    glPopMatrix();
-}
-
 void drawDino3()
 {
     GLUquadric *quad = gluNewQuadric();
@@ -1718,14 +1735,80 @@ void gate(float scale = 1.0f)
     glPopMatrix();
 }
 
+void drawHDR()
+{
+    glPushMatrix();
+    glRotatef(270, 1, 0, 0);
+    hdrTexture = loadTexture("hdr1.jpg");
+    GLUquadric *quad = gluNewQuadric();
+
+    glEnable(GL_TEXTURE_2D);
+    gluQuadricTexture(quad, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D, hdrTexture);
+
+    glPushMatrix();
+    gluSphere(quad, 50, 32, 32);
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+    gluDeleteQuadric(quad);
+
+    glPopMatrix();
+}
+
+// draw cloud
+void drawCloud()
+{
+    float cloud_move = sin(cloud_animation * 0.05) * 0.5f;
+
+    glPushMatrix();
+    glTranslatef(0, 0, cloud_move);
+    glColor3f(1, 1, 1);
+    glScalef(0.5f, 0.5f, 0.5f);
+    glutSolidIcosahedron();
+    glTranslatef(0, 0, 0.8);
+    glScalef(0.8f, 0.8f, 0.8f);
+    glutSolidIcosahedron();
+    glTranslatef(0, 0, -2);
+    glScalef(0.8f, 0.8f, 0.8f);
+    glutSolidIcosahedron();
+    glPopMatrix();
+}
+
+// draw clouds
+void drawClouds()
+{
+
+    srand(37); // Use current time as seed for randomness
+
+    for (int i = 0; i < 60; ++i)
+    {
+        float x = static_cast<float>(rand() % 41 - 20); // Random x position between -20 and 20
+        float z = static_cast<float>(rand() % 41 - 20); // Random z position between -20 and 20
+        float scales[] = {1.0f, 1.2f, 1.4f, 1.6f, 1.8f, 2.0f};
+        float s = scales[rand() % 6]; // Randomly select one of the predefined scales
+
+        glPushMatrix();
+        glTranslatef(x, 0, z);
+        glScalef(s, s, s);
+        drawCloud();
+        glPopMatrix();
+    }
+}
+
 //------------Draw Scene---------------------------------
 void drawScene()
 {
+    // drawHDR();
+
     glPushMatrix();
     drawFloor();
     glPopMatrix();
 
+    glPushMatrix();
     drawForest();
+    glPopMatrix();
+
     glPushMatrix();
     drawFence();
     glPopMatrix();
@@ -1753,6 +1836,11 @@ void drawScene()
     glPushMatrix();
     glTranslatef(-10, 1.2, 2);
     drawDino3();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 8, 0);
+    drawClouds();
     glPopMatrix();
 
     glColor3f(1, 1, 1);
@@ -1985,6 +2073,13 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
+void timer(int value)
+{
+    cloud_animation += 1;
+    glutPostRedisplay();
+    glutTimerFunc(16, timer, 0);
+}
+
 void idle()
 {
     glutPostRedisplay();
@@ -2005,6 +2100,7 @@ int main(int argc, char **argv)
     glutIdleFunc(idle);          // Set the idle function
     glutMotionFunc(mouseMotion); // Set the mouse motion function
     glutMouseFunc(mouseButton);  // Set the mouse button function
+    glutTimerFunc(16, timer, 0);
     init();
     glutMainLoop();
     return 0;
