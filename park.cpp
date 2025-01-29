@@ -52,6 +52,7 @@ constexpr float PI = 3.14159265358979323846;
 // Variables to control the visibility of the grid and axes
 bool showGrid = true;
 bool showAxes = true;
+bool isMoving = false;
 
 // Global color variables
 GLfloat wheelColor[] = {0.7529f, 0.7529f, 0.7529f};
@@ -92,7 +93,10 @@ float gateAngle = 0.0f;
 float tailAngle = 0.0f;
 float headAngle = 0.0f;
 float cloud_animation = 0.0f;
+float leg_animation = 0.0f;
 float animationSpeed = 2.0f; // Controls how fast the animation moves
+float dino3_movementX = 0.0f;
+float dino3_movementZ = 0.0f;
 
 struct Vertex
 {
@@ -1520,8 +1524,45 @@ void drawDino2()
     glDisable(GL_TEXTURE_2D);
 }
 
+void drawDino3Legs()
+{
+    float legSwing = isMoving ? sin(leg_animation * 0.1f) * 5.0f : 0.0f;
+
+    glPushMatrix();
+
+    // front left leg
+    glPushMatrix();
+    glRotatef(legSwing, 1, 0, 0);
+    drawLeg3();
+    glPopMatrix();
+
+    // front right leg
+    glPushMatrix();
+    glTranslatef(-0.4, 0, 0);
+    glRotatef(-legSwing, 1, 0, 0);
+    drawLeg3();
+    glPopMatrix();
+
+    // back right leg
+    glPushMatrix();
+    glTranslatef(-0.4, 0, -0.5);
+    glRotatef(legSwing, 1, 0, 0);
+    drawLeg3();
+    glPopMatrix();
+
+    // back left leg
+    glPushMatrix();
+    glTranslatef(0, 0, -0.5);
+    glRotatef(-legSwing, 1, 0, 0);
+    drawLeg3();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
 void drawDino3()
 {
+
     GLUquadric *quad = gluNewQuadric();
     rhinoTexture = loadTexture("rhino.png");
     glColor3f(0.51, 0.77, 0.45);
@@ -1585,7 +1626,7 @@ void drawDino3()
     glPopMatrix();
     gluDeleteQuadric(quad);
 
-    // BODY FROM HERES
+    // BODY FROM HERE
     glColor3f(0.51, 0.77, 0.45);
     glScalef(1.2, 1.2, 1.2);
 
@@ -1623,22 +1664,8 @@ void drawDino3()
 
     // legs
     glPushMatrix();
-    drawLeg3();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(-0.4, 0, 0);
-    drawLeg3();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(-0.4, 0, -0.5);
-    drawLeg3();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 0, -0.5);
-    drawLeg3();
+    // glRotatef(legSwing, 1, 0, 0);
+    drawDino3Legs();
     glPopMatrix();
 
     // Eyes
@@ -1834,7 +1861,8 @@ void drawScene()
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(-10, 1.2, 2);
+    glTranslatef(dino3_movementX - 10, 1.2, dino3_movementZ + 2);
+    glRotatef(180, 0, 1, 0);
     drawDino3();
     glPopMatrix();
 
@@ -1981,6 +2009,7 @@ void keyboardSpecial(int key, int x, int y)
 
 void keyboard(unsigned char key, int x, int y)
 {
+
     switch (key)
     {
     case 27:     // 27 is the ASCII code for the Esc key
@@ -2048,6 +2077,23 @@ void keyboard(unsigned char key, int x, int y)
     case '3':
         glDisable(GL_LIGHT0);
         break;
+    case '4':
+        isMoving = true;
+        dino3_movementX -= 0.1;
+        break;
+    case '8':
+        isMoving = true;
+        dino3_movementZ -= 0.1;
+        break;
+    case '5':
+        isMoving = true;
+        dino3_movementZ += 0.1;
+        break;
+    case '6':
+        isMoving = true;
+        dino3_movementX += 0.1;
+        break;
+
     case '!':
         glDisable(GL_LIGHT0); // Light at -x
         break;
@@ -2073,9 +2119,20 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
+// Keyboard release callback
+void keyboardUp(unsigned char key, int x, int y)
+{
+
+    if (key == '4' || key == '8' || key == '5' || key == '6')
+    {
+        isMoving = false;
+    }
+}
+
 void timer(int value)
 {
     cloud_animation += 1;
+    leg_animation += 1;
     glutPostRedisplay();
     glutTimerFunc(16, timer, 0);
 }
@@ -2094,6 +2151,7 @@ int main(int argc, char **argv)
     glutCreateWindow("Low poly jurrasic park");
     glutFullScreen(); // Set the window to fullscreen mode
     glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboardUp);
     glutSpecialFunc(keyboardSpecial);
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
