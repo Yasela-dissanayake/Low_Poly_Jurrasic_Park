@@ -5,6 +5,10 @@
 #include <cstdlib>
 #include <ctime>
 #include <tuple>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 GLfloat trainPosition = 0.0;
 GLfloat camXInit = 0.0;
@@ -80,11 +84,28 @@ GLuint doorrTexture;
 GLuint logoTexture;
 GLuint woodTexture;
 GLuint dinoTexture;
+GLuint dino2Texture;
+GLuint rhinoTexture;
 
 float gateAngle = 0.0f;
 float tailAngle = 0.0f;
 float headAngle = 0.0f;
 float animationSpeed = 2.0f; // Controls how fast the animation moves
+
+struct Vertex
+{
+    float x, y, z;
+    float texU, texV; // Added texture coordinates
+    Vertex(float _x = 0, float _y = 0, float _z = 0, float _u = 0, float _v = 0)
+        : x(_x), y(_y), z(_z), texU(_u), texV(_v) {}
+};
+
+struct Face
+{
+    std::vector<Vertex> vertices;
+};
+
+std::vector<Face> faces;
 
 // save normals
 std::tuple<float, float, float> normal;
@@ -118,6 +139,38 @@ std::tuple<float, float, float> calculateNormal(
     return std::make_tuple(nx, ny, nz);
 }
 
+// Function to trim whitespace from string
+std::string trim(const std::string &str)
+{
+    size_t first = str.find_first_not_of(" \t");
+    if (first == std::string::npos)
+        return "";
+    size_t last = str.find_last_not_of(" \t");
+    return str.substr(first, (last - first + 1));
+}
+
+// Function to parse vertex coordinates from string
+Vertex parseVertex(const std::string &line)
+{
+    std::string coords = line.substr(line.find("[") + 1);
+    coords = coords.substr(0, coords.find("]"));
+
+    std::stringstream ss(coords);
+    std::string temp;
+    std::vector<float> values;
+
+    while (std::getline(ss, temp, ','))
+    {
+        values.push_back(std::stof(trim(temp)));
+    }
+
+    // Calculate texture coordinates based on vertex position
+    float texU = (values[0] + 5.0f) / 10.0f; // Map [-5,5] to [0,1]
+    float texV = (values[2] + 5.0f) / 10.0f; // Map [-5,5] to [0,1]
+
+    return Vertex(values[0], values[1], values[2], texU, texV);
+}
+
 //-------------------Environment-------------------
 
 GLuint loadTexture(const char *filename)
@@ -142,6 +195,45 @@ GLuint loadTexture(const char *filename)
     }
 
     return texture;
+}
+
+void loadFacesFromFile(const char *filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        printf("Failed to open file: %s\n", filename);
+        return;
+    }
+
+    std::string line;
+    Face currentFace;
+
+    while (std::getline(file, line))
+    {
+        line = trim(line);
+
+        if (line.find("Face") == 0)
+        {
+            if (!currentFace.vertices.empty())
+            {
+                faces.push_back(currentFace);
+                currentFace.vertices.clear();
+            }
+        }
+        else if (line.find("Vertex") == 0)
+        {
+            currentFace.vertices.push_back(parseVertex(line));
+        }
+    }
+
+    if (!currentFace.vertices.empty())
+    {
+        faces.push_back(currentFace);
+    }
+
+    file.close();
+    printf("Loaded %zu faces from file\n", faces.size());
 }
 
 void drawGrid()
@@ -215,7 +307,7 @@ void drawAxes()
 
 void init(void)
 {
-    glClearColor(0.4, 0.4, 0.4, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glClearDepth(1.0);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
@@ -244,6 +336,10 @@ void init(void)
     glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     floorTexture = loadTexture("ground.png");
+    dino2Texture = loadTexture("dino-texture2.jpg");
+
+    // Load the faces from file
+    loadFacesFromFile("dino1.txt");
 }
 
 // animation angles update
@@ -463,21 +559,25 @@ void drawPyramid(float baseSize, float height)
     glPushMatrix();
     glBegin(GL_TRIANGLES);
     // Front face
+    glNormal3f(0.0f, 0.5f, 0.5f);
     glVertex3f(0.0f, height, 0.0f);
     glVertex3f(-halfBase, 0.0f, halfBase);
     glVertex3f(halfBase, 0.0f, halfBase);
 
     // Right face
+    glNormal3f(0.5f, 0.5f, 0.0f);
     glVertex3f(0.0f, height, 0.0f);
     glVertex3f(halfBase, 0.0f, halfBase);
     glVertex3f(halfBase, 0.0f, -halfBase);
 
     // Back face
+    glNormal3f(0.0f, 0.5f, -0.5f);
     glVertex3f(0.0f, height, 0.0f);
     glVertex3f(halfBase, 0.0f, -halfBase);
     glVertex3f(-halfBase, 0.0f, -halfBase);
 
     // Left face
+    glNormal3f(-0.5f, 0.5f, 0.0f);
     glVertex3f(0.0f, height, 0.0f);
     glVertex3f(-halfBase, 0.0f, -halfBase);
     glVertex3f(-halfBase, 0.0f, halfBase);
@@ -485,6 +585,7 @@ void drawPyramid(float baseSize, float height)
 
     // Base of the pyramid
     glBegin(GL_QUADS);
+    glNormal3f(0.0f, -1.0f, 0.0f);
     glVertex3f(-halfBase, 0.0f, halfBase);
     glVertex3f(halfBase, 0.0f, halfBase);
     glVertex3f(halfBase, 0.0f, -halfBase);
@@ -630,6 +731,47 @@ void pileWithBevels(float height, float width, float bevel)
     glPopMatrix();
 }
 
+// prism
+void drawPrism(float base, float height, float depth)
+{
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+
+    // Front face (triangle)
+    glVertex3f(-base / 2, 0.0f, depth / 2);
+    glVertex3f(base / 2, 0.0f, depth / 2);
+    glVertex3f(0.0f, height, depth / 2);
+
+    // Back face (triangle)
+    glVertex3f(-base / 2, 0.0f, -depth / 2);
+    glVertex3f(base / 2, 0.0f, -depth / 2);
+    glVertex3f(0.0f, height, -depth / 2);
+
+    glEnd();
+    glBegin(GL_QUADS);
+
+    // Bottom face (rectangle)
+    glVertex3f(-base / 2, 0.0f, depth / 2);
+    glVertex3f(base / 2, 0.0f, depth / 2);
+    glVertex3f(base / 2, 0.0f, -depth / 2);
+    glVertex3f(-base / 2, 0.0f, -depth / 2);
+
+    // Left face (rectangle)
+    glVertex3f(-base / 2, 0.0f, depth / 2);
+    glVertex3f(0.0f, height, depth / 2);
+    glVertex3f(0.0f, height, -depth / 2);
+    glVertex3f(-base / 2, 0.0f, -depth / 2);
+
+    // Right face (rectangle)
+    glVertex3f(base / 2, 0.0f, depth / 2);
+    glVertex3f(0.0f, height, depth / 2);
+    glVertex3f(0.0f, height, -depth / 2);
+    glVertex3f(base / 2, 0.0f, -depth / 2);
+
+    glEnd();
+    glPopMatrix();
+}
+
 //-------------------Floor with Texture-------------------
 void drawFloor()
 {
@@ -747,7 +889,7 @@ void drawForest()
     srand(40);
     // srand(static_cast<unsigned int>(time(0))); // Use current time as seed for randomness
 
-    for (int i = 0; i < 40; ++i)
+    for (int i = 0; i < 60; ++i)
     {
         float x = static_cast<float>(rand() % 41 - 20); // Random x position between -20 and 20
         float z = static_cast<float>(rand() % 41 - 20); // Random z position between -20 and 20
@@ -1026,47 +1168,6 @@ void drawFoot(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f
     glPopMatrix();
 }
 
-// prism
-void drawPrism(float base, float height, float depth)
-{
-    glPushMatrix();
-    glBegin(GL_TRIANGLES);
-
-    // Front face (triangle)
-    glVertex3f(-base / 2, 0.0f, depth / 2);
-    glVertex3f(base / 2, 0.0f, depth / 2);
-    glVertex3f(0.0f, height, depth / 2);
-
-    // Back face (triangle)
-    glVertex3f(-base / 2, 0.0f, -depth / 2);
-    glVertex3f(base / 2, 0.0f, -depth / 2);
-    glVertex3f(0.0f, height, -depth / 2);
-
-    glEnd();
-    glBegin(GL_QUADS);
-
-    // Bottom face (rectangle)
-    glVertex3f(-base / 2, 0.0f, depth / 2);
-    glVertex3f(base / 2, 0.0f, depth / 2);
-    glVertex3f(base / 2, 0.0f, -depth / 2);
-    glVertex3f(-base / 2, 0.0f, -depth / 2);
-
-    // Left face (rectangle)
-    glVertex3f(-base / 2, 0.0f, depth / 2);
-    glVertex3f(0.0f, height, depth / 2);
-    glVertex3f(0.0f, height, -depth / 2);
-    glVertex3f(-base / 2, 0.0f, -depth / 2);
-
-    // Right face (rectangle)
-    glVertex3f(base / 2, 0.0f, depth / 2);
-    glVertex3f(0.0f, height, depth / 2);
-    glVertex3f(0.0f, height, -depth / 2);
-    glVertex3f(base / 2, 0.0f, -depth / 2);
-
-    glEnd();
-    glPopMatrix();
-}
-
 void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
 {
     glPushMatrix();
@@ -1080,6 +1181,19 @@ void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0
     glPopMatrix();
 }
 
+// Eye
+void drawEye()
+{
+    GLUquadric *quad = gluNewQuadric();
+    glPushMatrix();
+    gluSphere(quad, 0.06, 32, 32);
+    glColor3f(0, 0, 0);
+    glTranslatef(0, -0.02, -0.01);
+    gluSphere(quad, 0.04, 32, 32);
+    glPopMatrix();
+
+    gluDeleteQuadric(quad);
+}
 // Draw dino 1
 void drawDino(float scale = 1.0f)
 {
@@ -1176,32 +1290,27 @@ void drawDino(float scale = 1.0f)
     drawFoot(-0.2, 0.05, 1);
 
     // left eye
-    GLUquadric *quad = gluNewQuadric();
+
     glPushMatrix();
     glTranslatef(-1.5, 3.25, 0.3);
-    gluSphere(quad, 0.06, 32, 32);
-    glColor3f(0, 0, 0);
-    glTranslatef(0, -0.02, -0.01);
-    gluSphere(quad, 0.05, 32, 32);
+    drawEye();
     glPopMatrix();
 
     // right eye
     glPushMatrix();
     glColor3f(1, 1, 1);
     glTranslatef(-1.5, 3.25, 0.7);
-    gluSphere(quad, 0.06, 32, 32);
-    glColor3f(0, 0, 0);
-    glTranslatef(0, -0.02, 0.018);
-    gluSphere(quad, 0.05, 32, 32);
+    drawEye();
     glPopMatrix();
 
     glPopMatrix();
 }
 
+// Draw dino 2
 void drawDino2()
 {
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, dinoTexture);
+    glBindTexture(GL_TEXTURE_2D, dino2Texture);
 
     // Update animation angles
     updateAnimation();
@@ -1300,9 +1409,242 @@ void drawDino2()
     glEnd();
 
     glPopMatrix();
+
     glDisable(GL_TEXTURE_2D);
 }
 
+void drawHorn()
+{
+    glPushMatrix();
+    glColor3f(1, 1, 1);
+    drawPyramid(0.15, 0.35);
+    glPopMatrix();
+}
+
+void drawNails()
+{
+
+    glPushMatrix();
+    glPushMatrix();
+    glTranslatef(0.1, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.1, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+// draw dino 3 leg
+void drawLeg3()
+{
+    rhinoTexture = loadTexture("rhino.png");
+    glColor3f(0.51, 0.77, 0.45);
+
+    glPushMatrix();
+    glTranslatef(0.18, -1, 0.5);
+    doorPilePyramid(0.7, 0.13, 0.08, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.18, -1, 0.5);
+    doorPilePyramid(0.3, 0.08, 0.16, rhinoTexture, rhinoTexture);
+
+    glPushMatrix();
+    drawNails();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void drawThorns()
+{
+    glPushMatrix();
+    glScalef(1, 0.3, 1);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.14, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glScalef(0.8, 0.8, 0.8);
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glScalef(0.8, 0.8, 0.8);
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.35, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.4, -0.2);
+    drawHorn();
+    glPopMatrix();
+}
+
+void drawDino3()
+{
+    GLUquadric *quad = gluNewQuadric();
+    rhinoTexture = loadTexture("rhino.png");
+    glColor3f(0.51, 0.77, 0.45);
+    glPushMatrix();
+
+    // head ring
+    glPushMatrix();
+    glScalef(1.1, 1.1, 1.1);
+    glScalef(0.7, 1, 1);
+    glTranslatef(0, 0.2, 1);
+    glEnable(GL_TEXTURE_2D);
+    gluQuadricTexture(quad, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D, rhinoTexture);
+    gluCylinder(quad, 0.8, 0.8, 0.15, 10, 10);
+    gluDisk(quad, 0, 0.8, 10, 10);
+    glTranslatef(0, 0, 0.15);
+    gluDisk(quad, 0, 0.8, 10, 10);
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+
+    // head part 1
+    glPushMatrix();
+    glTranslatef(0, 0, 1.4);
+    glEnable(GL_TEXTURE_2D);
+    gluQuadricTexture(quad, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D, rhinoTexture);
+    gluSphere(quad, 0.5, 5, 5);
+    glPopMatrix();
+
+    // head part 2
+    glPushMatrix();
+    glTranslatef(0, 0, 1.8);
+    glEnable(GL_TEXTURE_2D);
+    gluQuadricTexture(quad, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D, rhinoTexture);
+    gluSphere(quad, 0.25, 5, 5);
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.17, 0.25, 1.6);
+    glRotatef(-30, 0, 0, 1);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.17, 0.25, 1.6);
+    glRotatef(30, 0, 0, 1);
+    drawHorn();
+    glPopMatrix();
+
+    // white beak
+    glPushMatrix();
+    glTranslatef(0, 0, 2);
+    glColor3f(1, 1, 1);
+    gluCylinder(quad, 0.15, 0.1, 0.15, 6, 6);
+    glTranslatef(0, 0, 0.12);
+    gluDisk(quad, 0, 0.1, 6, 6);
+    glRotatef(30, 1, 0, 0);
+    gluCylinder(quad, 0.1, 0.01, 0.17, 6, 6);
+    glPopMatrix();
+    gluDeleteQuadric(quad);
+
+    // BODY FROM HERES
+    glColor3f(0.51, 0.77, 0.45);
+    glScalef(1.2, 1.2, 1.2);
+
+    // body part1
+    glPushMatrix();
+    glRotatef(90, 1, 0, 0);
+    doorPilePyramid(1, 0.25, 0.45, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    // body part2
+    glPushMatrix();
+    glRotatef(-90, 1, 0, 0);
+    doorPilePyramid(1, 0.18, 0.45, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    // tail part1
+    glPushMatrix();
+    glTranslatef(0, 0, -0.95);
+    glRotatef(-110, 1, 0, 0);
+    doorPilePyramid(0.5, 0.1, 0.18, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    // tail part2
+    glPushMatrix();
+    glTranslatef(0, -0.17, -1.4);
+    glRotatef(-100, 1, 0, 0);
+    doorPilePyramid(0.4, 0.02, 0.1, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    // back thorns
+    glPushMatrix();
+    glTranslatef(0, 0.3, 0.7);
+    drawThorns();
+    glPopMatrix();
+
+    // legs
+    glPushMatrix();
+    drawLeg3();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.4, 0, 0);
+    drawLeg3();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.4, 0, -0.5);
+    drawLeg3();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0, -0.5);
+    drawLeg3();
+    glPopMatrix();
+
+    // Eyes
+    glPushMatrix();
+    glColor3f(1, 1, 1);
+    glTranslatef(0.2, 0.1, 1.5);
+    glRotatef(-60, 0, 1, 0);
+    glRotatef(90, 0, 0, 1);
+    drawEye();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(1, 1, 1);
+    glTranslatef(-0.2, 0.1, 1.5);
+    glRotatef(60, 0, 1, 0);
+    glRotatef(-90, 0, 0, 1);
+    drawEye();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+// Draw Gate methods
 void banner()
 {
     woodTexture = loadTexture("wood.png");
@@ -1389,7 +1731,6 @@ void drawScene()
     glPopMatrix();
 
     glPushMatrix();
-    // drawDoor(-19, 0, 0, 1);
     glTranslatef(-19, 0, -1.5);
     glRotatef(270, 0, 1, 0);
     gate(1.8);
@@ -1398,6 +1739,20 @@ void drawScene()
     glPushMatrix();
     glTranslatef(5, 0, 2);
     drawDino(1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-10.0, 1.7, -10.0);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(180, 0.0, 0.0, 1.0);
+    glScalef(1, 1, 1);
+    glColor3f(1.0, 1.0, 1.0);
+    drawDino2();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-10, 1.2, 2);
+    drawDino3();
     glPopMatrix();
 
     glColor3f(1, 1, 1);
