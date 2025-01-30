@@ -97,6 +97,7 @@ float animationSpeed = 2.0f; // Controls how fast the animation moves
 float dino3_movementX = 0.0f;
 float dino3_movementZ = 0.0f;
 
+// VERTICES STRUCTURE
 struct Vertex
 {
     float x, y, z;
@@ -105,6 +106,7 @@ struct Vertex
         : x(_x), y(_y), z(_z), texU(_u), texV(_v) {}
 };
 
+// FACES SRUCTURE
 struct Face
 {
     std::vector<Vertex> vertices;
@@ -112,10 +114,10 @@ struct Face
 
 std::vector<Face> faces;
 
-// save normals
+// SAVE NORMALS
 std::tuple<float, float, float> normal;
 
-// function for calculate normals
+// -------------------- NORMAL CALCULATION FUNCTIONS ------------------------------
 std::tuple<float, float, float> calculateNormal(
     const std::tuple<float, float, float> &v1,
     const std::tuple<float, float, float> &v2,
@@ -310,28 +312,40 @@ void drawAxes()
     glPopMatrix();
 }
 
-void init(void)
+//----------------------------- LIGHTING AND SHADING ------------------------------
+
+void setLightingAndShading()
 {
-    glClearColor(0, 0, 0, 1.0);
-    glClearDepth(1.0);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-
-    // Enable lighting
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHT1);
 
-    // Set up light parameters for the first light
-    GLfloat light0Ambient[] = {0.2f, 0.2f, 0.2f, 1.0f};
-    GLfloat light0Diffuse[] = {0.8f, 0.8f, 0.8f, 1.0f};
-    GLfloat light0Specular[] = {1.0f, 0.5f, 1.0f, 1.0f};
-    GLfloat light0Position[] = {0.0f, 10.0f, 10.0f, 10.0f};
+    // First Light Source (GL_LIGHT0) - White light
+    GLfloat l0amb[] = {0.2, 0.2, 0.2, 1.0};
+    GLfloat l0diff[] = {0.8, 0.8, 0.8, 1.0};
+    GLfloat l0spec[] = {0.2, 0.2, 0.2, 1.0};
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light0Ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0Diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light0Specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, light0Position);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, l0amb);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, l0diff);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, l0spec);
+    glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
+
+    // Second Light Source (GL_LIGHT1) - Yellow tinted light
+    GLfloat l1amb[] = {0.2, 0.2, 0.0, 1.0};  // Yellow ambient
+    GLfloat l1diff[] = {1.0, 1.0, 0.0, 1.0}; // Yellow diffuse
+    GLfloat l1spec[] = {0.2, 0.2, 0.0, 1.0}; // Yellow specular
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, l1amb);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, l1diff);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, l1spec);
+    glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
+
+    // Material properties
+    glEnable(GL_COLOR_MATERIAL);
+    glShadeModel(GL_SMOOTH);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+    GLfloat specRef[] = {0.7, 0.7, 0.7, 1.0};
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specRef);
+    glMateriali(GL_FRONT, GL_SHININESS, 128);
 
     // Enable color tracking
     glEnable(GL_COLOR_MATERIAL);
@@ -340,14 +354,10 @@ void init(void)
     // Enable smooth shading
     glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    floorTexture = loadTexture("floor3.png");
-    dino2Texture = loadTexture("dino-texture2.jpg");
-
-    // Load the faces from file
-    loadFacesFromFile("dino1.txt");
 }
 
-// animation angles update
+//------------------- BLENDER DINO ANIMATION -------------------
+
 void updateAnimation()
 {
     // body swing
@@ -357,7 +367,8 @@ void updateAnimation()
     headAngle = 10.0f * sin(glutGet(GLUT_ELAPSED_TIME) * 0.0007f * animationSpeed);
 }
 
-//-------------------Basic Shapes-------------------
+//------------------- BASIC SHAPES -------------------
+
 void drawClosedCylinder()
 {
     const int slices = 20;
@@ -736,7 +747,6 @@ void pileWithBevels(float height, float width, float bevel)
     glPopMatrix();
 }
 
-// prism
 void drawPrism(float base, float height, float depth)
 {
     glPushMatrix();
@@ -777,7 +787,7 @@ void drawPrism(float base, float height, float depth)
     glPopMatrix();
 }
 
-//-------------------Floor with Texture-------------------
+//------------------- FLOOR WITH TEXTURE -------------------
 void drawFloor()
 {
     glPushMatrix();
@@ -803,7 +813,7 @@ void drawFloor()
     glPopMatrix();
 }
 
-//-------------------Draw Tree Trunk-------------------
+//------------------- DRAW TREE TRUNk -------------------
 void drawTreeTrunk()
 {
 
@@ -829,7 +839,7 @@ void drawTreeTrunk()
     glPopMatrix();
 }
 
-//-----------------  Pine Tree -------------------
+//-----------------  PINE TREE -------------------
 void drawPineTree(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
 {
     glPushMatrix();
@@ -857,7 +867,7 @@ void drawPineTree(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 
     glPopMatrix();
 }
 
-//-------------------Draw regular tree-------------------
+//------------------- DRAW REGULAR TREE -------------------
 void drawRegularTree(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
 {
 
@@ -888,7 +898,7 @@ void drawRegularTree(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale
     glPopMatrix();
 }
 
-//-------------------Floor with multiple tree types-------------------
+//------------------- FLOOR WITH MULTIPLE TREE TYPES (FOREST) -------------------
 void drawForest()
 {
     srand(40);
@@ -914,7 +924,7 @@ void drawForest()
     }
 }
 
-//-------------------Door pile Pyramid-------------------
+//------------------- DOOR PILE PYRAMID-------------------
 void doorPilePyramid(float height, float half_top_width, float half_bottom_width, GLuint texture, GLuint texture_f)
 {
     glPushMatrix();
@@ -1025,7 +1035,7 @@ void doorPilePyramid(float height, float half_top_width, float half_bottom_width
     glPopMatrix();
 }
 
-//-------------------Door pile-------------------
+//-------------------  DOOR PILE -------------------
 void drawDoorPile(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
 {
     glPushMatrix();
@@ -1036,7 +1046,8 @@ void drawDoorPile(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 
     glPopMatrix();
 }
 
-// Draw one section of the fence
+//--------------------------- FENCE FUNCTIONS -------------------------------------
+
 void drawFenceSection()
 {
     // Draw two vertical posts
@@ -1086,7 +1097,6 @@ void drawFenceSection()
     glPopMatrix();
 }
 
-// Daw fence
 void drawFence()
 {
     float fenceLength = 40.0f; // Length of one side of the floor
@@ -1141,19 +1151,6 @@ void drawFence()
         glPopMatrix();
     }
 }
-
-// void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
-// {
-//     glPushMatrix();
-//     // glTranslatef(x, y, z);
-//     glScalef(scale, scale, scale);
-//     for (int i = 0; i < 6; i++)
-//     {
-//         drawPrism(0.8, 1, 0.8);
-//         glTranslatef(0, 0, 1.05);
-//     }
-//     glPopMatrix();
-// }
 
 //--------------------------- COMMON DINO FUNCTIONS -------------------------------------
 
@@ -1509,7 +1506,6 @@ void drawThorns()
     glPopMatrix();
 }
 
-// draw dino 3 leg
 void drawLeg3()
 {
     rhinoTexture = loadTexture("rhino.png");
@@ -2059,7 +2055,8 @@ void drawDino4()
     glPopMatrix();
 }
 
-// Draw Gate methods
+//------------------------ ENTRANCE GATE ----------------------
+
 void banner()
 {
     woodTexture = loadTexture("wood.png");
@@ -2133,28 +2130,8 @@ void gate(float scale = 1.0f)
     glPopMatrix();
 }
 
-void drawHDR()
-{
-    glPushMatrix();
-    glRotatef(270, 1, 0, 0);
-    hdrTexture = loadTexture("hdr2.jpg");
-    GLUquadric *quad = gluNewQuadric();
+// -------------------------CLOUD FUNCTIONS ------------------------------------------
 
-    glEnable(GL_TEXTURE_2D);
-    gluQuadricTexture(quad, GL_TRUE);
-    glBindTexture(GL_TEXTURE_2D, hdrTexture);
-
-    glPushMatrix();
-    gluSphere(quad, 50, 32, 32);
-    glPopMatrix();
-
-    glDisable(GL_TEXTURE_2D);
-    gluDeleteQuadric(quad);
-
-    glPopMatrix();
-}
-
-// draw cloud
 void drawCloud()
 {
     float cloud_move = sin(cloud_animation * 0.05) * 0.5f;
@@ -2173,7 +2150,6 @@ void drawCloud()
     glPopMatrix();
 }
 
-// draw clouds
 void drawClouds()
 {
 
@@ -2194,34 +2170,38 @@ void drawClouds()
     }
 }
 
-//------------Draw Scene---------------------------------
+//-------------------------- DRAW SCENE ---------------------------------
 void drawScene()
 {
-    // drawHDR();
-
+    // FLOOR
     glPushMatrix();
     drawFloor();
     glPopMatrix();
 
+    // FOREST
     glPushMatrix();
     drawForest();
     glPopMatrix();
 
+    // FENCE
     glPushMatrix();
     drawFence();
     glPopMatrix();
 
+    // GATE
     glPushMatrix();
     glTranslatef(-19, 0, -1.5);
     glRotatef(270, 0, 1, 0);
     gate(1.8);
     glPopMatrix();
 
+    // DINO 1
     glPushMatrix();
     glTranslatef(5, 0, 2);
     drawDino(1);
     glPopMatrix();
 
+    // DINO 2
     glPushMatrix();
     glTranslatef(-10.0, 1.7, -10.0);
     glRotatef(-90, 1.0, 0.0, 0.0);
@@ -2231,24 +2211,30 @@ void drawScene()
     drawDino2();
     glPopMatrix();
 
+    // DINO 3
     glPushMatrix();
     glTranslatef(dino3_movementX - 10, 1.2, dino3_movementZ + 2);
     glRotatef(180, 0, 1, 0);
     drawDino3();
     glPopMatrix();
 
+    // DINO 4
+    glPushMatrix();
+    glTranslatef(-15, 1.85, 0);
+    glRotatef(180, 0, 1, 0);
+    drawDino4();
+    glPopMatrix();
+
+    // CLOUDS
     glPushMatrix();
     glTranslatef(0, 8, 0);
     drawClouds();
     glPopMatrix();
 
-    glPushMatrix();
-    glTranslatef(0, 8, 0);
-    drawDino4();
-    glPopMatrix();
-
     glColor3f(1, 1, 1);
 }
+
+// -------------------------  RESHAPE FUNCTION ------------------------------------------
 
 void display(void)
 {
@@ -2256,7 +2242,7 @@ void display(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // setLightingAndShading();
+    setLightingAndShading();
 
     glPushMatrix();
 
@@ -2276,6 +2262,8 @@ void display(void)
     glutSwapBuffers();
 }
 
+// -------------------------  RESHAPE FUNCTION ------------------------------------------
+
 void reshape(GLsizei w, GLsizei h)
 {
     glViewport(0, 0, w, h);
@@ -2288,6 +2276,8 @@ void reshape(GLsizei w, GLsizei h)
     //  (FOV_in_vertical, aspect_ratio, z-distance to the near plane from the camera position, z-distance to far plane from the camera position)
     gluPerspective(120.0, aspect_ratio, 0.01, 500.0);
 }
+
+// ------------------------- MOUSE MOTION FUNCTION ------------------------------------------
 
 void mouseMotion(int x, int y)
 {
@@ -2312,6 +2302,8 @@ void mouseMotion(int x, int y)
 
     glutPostRedisplay();
 }
+
+// ------------------------- MOUSE BUTTON FUNCTION ------------------------------------------
 
 void mouseButton(int button, int state, int x, int y)
 {
@@ -2366,6 +2358,8 @@ void mouseButton(int button, int state, int x, int y)
     }
 }
 
+// ---------------------------- KEYBOARD SPECIAL FUNCTION -----------------------
+
 void keyboardSpecial(int key, int x, int y)
 {
     if (key == GLUT_KEY_UP)
@@ -2382,6 +2376,8 @@ void keyboardSpecial(int key, int x, int y)
 
     glutPostRedisplay();
 }
+
+// ---------------------- KEYBOARD FUNCTION -----------------------
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -2495,7 +2491,8 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
-// Keyboard release callback
+// --------------------------- KEYBOARD RELEASE CALLBACK (DINO MOVEMENT) -----------------------
+
 void keyboardUp(unsigned char key, int x, int y)
 {
 
@@ -2505,6 +2502,8 @@ void keyboardUp(unsigned char key, int x, int y)
     }
 }
 
+//------------------------------------ TIMER FUNCTION ----------------------------
+
 void timer(int value)
 {
     cloud_animation += 1;
@@ -2513,10 +2512,30 @@ void timer(int value)
     glutTimerFunc(16, timer, 0);
 }
 
+// ----------------------------------- IDLE FUNCTION -----------------------------
+
 void idle()
 {
     glutPostRedisplay();
 }
+
+// --------------------------------- INIT FUNCTION ------------------------------
+
+void init(void)
+{
+    glClearColor(0, 0, 0, 1.0);
+    glClearDepth(1.0);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+
+    floorTexture = loadTexture("floor3.png");
+    dino2Texture = loadTexture("dino-texture2.jpg");
+
+    // Load the faces from file
+    loadFacesFromFile("dino1.txt");
+}
+
+// -------------------------------- MAIN FUNCTION -------------------------------
 
 int main(int argc, char **argv)
 {
