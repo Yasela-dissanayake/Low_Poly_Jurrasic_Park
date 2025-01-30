@@ -320,7 +320,7 @@ void setLightingAndShading()
 
     // First Light Source (GL_LIGHT0) - White light
     GLfloat l0amb[] = {0.2, 0.2, 0.2, 1.0};
-    GLfloat l0diff[] = {0.8, 0.8, 0.8, 1.0};
+    GLfloat l0diff[] = {0.6, 0.6, 0.6, 1.0};
     GLfloat l0spec[] = {0.2, 0.2, 0.2, 1.0};
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, l0amb);
@@ -2214,7 +2214,7 @@ void drawScene()
     // DINO 3
     glPushMatrix();
     glTranslatef(dino3_movementX - 10, 1.2, dino3_movementZ + 2);
-    glRotatef(180, 0, 1, 0);
+    glRotatef(210, 0, 1, 0);
     drawDino3();
     glPopMatrix();
 
