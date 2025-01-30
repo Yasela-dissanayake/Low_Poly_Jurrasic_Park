@@ -10,7 +10,6 @@
 #include <string>
 #include <sstream>
 
-GLfloat trainPosition = 0.0;
 GLfloat camXInit = 0.0;
 GLfloat camYInit = 0.5;
 GLfloat camZInit = 0.0;
@@ -1143,18 +1142,20 @@ void drawFence()
     }
 }
 
-void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
-{
-    glPushMatrix();
-    // glTranslatef(x, y, z);
-    glScalef(scale, scale, scale);
-    for (int i = 0; i < 6; i++)
-    {
-        drawPrism(0.8, 1, 0.8);
-        glTranslatef(0, 0, 1.05);
-    }
-    glPopMatrix();
-}
+// void drawTeeth(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
+// {
+//     glPushMatrix();
+//     // glTranslatef(x, y, z);
+//     glScalef(scale, scale, scale);
+//     for (int i = 0; i < 6; i++)
+//     {
+//         drawPrism(0.8, 1, 0.8);
+//         glTranslatef(0, 0, 1.05);
+//     }
+//     glPopMatrix();
+// }
+
+//--------------------------- COMMON DINO FUNCTIONS -------------------------------------
 
 // Eye
 void drawEye()
@@ -1178,87 +1179,7 @@ void drawHorn()
     glPopMatrix();
 }
 
-void drawNails()
-{
-
-    glPushMatrix();
-    glPushMatrix();
-    glTranslatef(0.1, 0.02, 0.1);
-    glRotatef(90, 1, 0, 0);
-    glScalef(0.5, 0.5, 0.5);
-    drawHorn();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 0.02, 0.1);
-    glRotatef(90, 1, 0, 0);
-    glScalef(0.5, 0.5, 0.5);
-    drawHorn();
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(-0.1, 0.02, 0.1);
-    glRotatef(90, 1, 0, 0);
-    glScalef(0.5, 0.5, 0.5);
-    drawHorn();
-    glPopMatrix();
-
-    glPopMatrix();
-}
-
-// draw dino 3 leg
-void drawLeg3()
-{
-    rhinoTexture = loadTexture("rhino.png");
-    glColor3f(0.51, 0.77, 0.45);
-
-    glPushMatrix();
-    glTranslatef(0.18, -1, 0.5);
-    doorPilePyramid(0.7, 0.13, 0.08, rhinoTexture, rhinoTexture);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.18, -1, 0.5);
-    doorPilePyramid(0.3, 0.08, 0.16, rhinoTexture, rhinoTexture);
-
-    glPushMatrix();
-    drawNails();
-    glPopMatrix();
-
-    glPopMatrix();
-}
-
-void drawThorns()
-{
-    glPushMatrix();
-    glScalef(1, 0.3, 1);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, 0.09, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.14, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glScalef(0.8, 0.8, 0.8);
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glScalef(0.8, 0.8, 0.8);
-    glTranslatef(0, -0.18, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.35, -0.2);
-    drawHorn();
-    glTranslatef(0, -0.4, -0.2);
-    drawHorn();
-    glPopMatrix();
-}
+//--------------------------- DINO 1 (TREX v1) FUNCTIONS -------------------------------------
 
 // Draw foot
 void drawFoot(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f)
@@ -1305,7 +1226,7 @@ void drawFoot(float x = 0.0f, float y = 0.0f, float z = 0.0f, float scale = 1.0f
     glPopMatrix();
 }
 
-// Draw dino 1
+// Draw dino 1 (TREX V1)
 void drawDino(float scale = 1.0f)
 {
     dinoTexture = loadTexture("dino1-skin1.png");
@@ -1417,7 +1338,9 @@ void drawDino(float scale = 1.0f)
     glPopMatrix();
 }
 
-// Draw dino 2
+//------------------------------- DINO 2 FUNCTIONS (BLENDER) -----------------------------------
+
+// Draw dino 2 (BLENDER VERTICES)
 void drawDino2()
 {
     glEnable(GL_TEXTURE_2D);
@@ -1522,6 +1445,90 @@ void drawDino2()
     glPopMatrix();
 
     glDisable(GL_TEXTURE_2D);
+}
+
+//------------------------------- DINO 3 FUNCTIONS (GREEN DINO) -----------------------------------
+
+void drawNails()
+{
+
+    glPushMatrix();
+    glPushMatrix();
+    glTranslatef(0.1, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.1, 0.02, 0.1);
+    glRotatef(90, 1, 0, 0);
+    glScalef(0.5, 0.5, 0.5);
+    drawHorn();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void drawThorns()
+{
+    glPushMatrix();
+    glScalef(1, 0.3, 1);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, 0.09, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.14, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glScalef(0.8, 0.8, 0.8);
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glScalef(0.8, 0.8, 0.8);
+    glTranslatef(0, -0.18, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.35, -0.2);
+    drawHorn();
+    glTranslatef(0, -0.4, -0.2);
+    drawHorn();
+    glPopMatrix();
+}
+
+// draw dino 3 leg
+void drawLeg3()
+{
+    rhinoTexture = loadTexture("rhino.png");
+    glColor3f(0.51, 0.77, 0.45);
+
+    glPushMatrix();
+    glTranslatef(0.18, -1, 0.5);
+    doorPilePyramid(0.7, 0.13, 0.08, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.18, -1, 0.5);
+    doorPilePyramid(0.3, 0.08, 0.16, rhinoTexture, rhinoTexture);
+
+    glPushMatrix();
+    drawNails();
+    glPopMatrix();
+
+    glPopMatrix();
 }
 
 void drawDino3Legs()
@@ -1704,12 +1711,190 @@ void drawDino3()
     glPopMatrix();
 }
 
+//---------------------------------- DINO 4 (TREX) FUNCTIONS ---------------------------------------
+void drawDino4Nails()
+{
+
+    glColor3f(0.34, 0.28, 0.25); // brown
+
+    glPushMatrix();
+    glScalef(0.5, 0.5, 0.5);
+    glRotatef(90, 1, 0, 0);
+    doorPilePyramid(0.5, 0.07, 0.07, rhinoTexture, rhinoTexture);
+    glRotatef(180, 1, 0, 0);
+    drawHorn();
+    glPopMatrix();
+}
+
+void drawLeg()
+{
+    glPushMatrix();
+    glTranslatef(-0.7, -0.35, 2.3);
+    glScalef(0.25, 0.8, 0.8);
+    glRotatef(-10, 1, 0, 0);
+    doorPilePyramid(0.8, 0.4, 0.5, rhinoTexture, rhinoTexture);
+
+    glPushMatrix();
+    glRotatef(180, 1, 0, 0);
+    doorPilePyramid(0.9, 0.25, 0.5, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.7, -1.1, 2.6);
+    glScalef(0.25, 0.8, 0.8);
+    glRotatef(-60, 1, 0, 0);
+    doorPilePyramid(0.4, 0.25, 0.2, rhinoTexture, rhinoTexture);
+
+    glPushMatrix();
+    glTranslatef(0, -0.5, 0);
+    doorPilePyramid(0.6, 0.2, 0.1, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.7, -1.8, 2.8);
+    glScalef(0.35, 0.8, 0.5);
+    glRotatef(10, 1, 0, 0);
+    doorPilePyramid(0.6, 0.1, 0.2, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.7, -1.8, 2.8);
+    glScalef(0.5, 0.5, 0.5);
+    doorPilePyramid(0.6, 0.1, 0.27, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    // nails
+    glPushMatrix();
+    glTranslatef(-0.7, -1.8, 2.5);
+    drawDino4Nails();
+
+    glPushMatrix();
+    glTranslatef(-0.15, 0, 0);
+    glRotatef(20, 0, 1, 0);
+    drawDino4Nails();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.1, 0, 0.2);
+
+    glPushMatrix();
+    glColor3f(0.34, 0.28, 0.25); // brown
+    glScalef(0.5, 0.5, 0.5);
+    glRotatef(-45, 1, 0, 0);
+    doorPilePyramid(0.3, 0.07, 0.07, rhinoTexture, rhinoTexture);
+    // doorPilePyramid(0.3, 0.1, 0.25, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glTranslatef(0, 0.1, -0.2);
+    glScalef(1, 1, 0.5);
+    drawDino4Nails();
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void drawHandFinger()
+{
+    glPushMatrix();
+    doorPilePyramid(0.3, 0.04, 0.04, rhinoTexture, rhinoTexture);
+    glTranslatef(0, 0.3, 0);
+    glScalef(0.6, 0.3, 0.6);
+    drawHorn();
+    glPopMatrix();
+}
+
+void drawHand()
+{
+    glPushMatrix();
+    glTranslatef(-0.55, -0.2, 0.8);
+    glScalef(0.3, 0.4, 0.3);
+
+    glPushMatrix();
+    glScalef(0.25, 0.8, 0.8);
+    glRotatef(-10, 1, 0, 0);
+    doorPilePyramid(0.8, 0.4, 0.5, rhinoTexture, rhinoTexture);
+
+    glPushMatrix();
+    glRotatef(180, 1, 0, 0);
+    doorPilePyramid(0.9, 0.25, 0.5, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPushMatrix();
+    glScalef(0.25, 0.4, 0.8);
+    glTranslatef(0, -2.5, -1.8);
+    glRotatef(60, 1, 0, 0);
+    doorPilePyramid(2.5, 0.2, 0.25, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, -0.88, -1.4);
+    glScalef(0.25, 0.4, 0.8);
+    glRotatef(190, 1, 0, 0);
+    doorPilePyramid(1.5, 0.3, 0.20, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, -1.4, -1.7);
+    glScalef(0.25, 0.2, 0.8);
+    glRotatef(120, 1, 0, 0);
+    doorPilePyramid(0.8, 0.6, 0.20, rhinoTexture, rhinoTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.1, -1.5, -1.3);
+    glRotatef(110, 1, 0, 0);
+    drawHandFinger();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-0.1, -1.5, -1.3);
+    glRotatef(110, 1, 0, 0);
+    drawHandFinger();
+    glPopMatrix();
+
+    //  glTranslatef(-0.20, 0, 0);
+    // doorPilePyramid(0.5, 0.04, 0.04, rhinoTexture, rhinoTexture);
+    // glTranslatef(-0.20, 0, 0);
+    // drawHorn();
+
+    // glPushMatrix();
+    // glTranslatef(-0.7, -1.1, 2.6);
+    // glScalef(0.25, 0.8, 0.8);
+    // glRotatef(-60, 1, 0, 0);
+    // doorPilePyramid(0.4, 0.25, 0.2, rhinoTexture, rhinoTexture);
+
+    // glPushMatrix();
+    // glTranslatef(0, -0.5, 0);
+    // doorPilePyramid(0.6, 0.2, 0.1, rhinoTexture, rhinoTexture);
+    // glPopMatrix();
+
+    // glPopMatrix();
+
+    glPopMatrix();
+}
+
+void drawDino4Eye()
+{
+    glPushMatrix();
+    glTranslatef(-0.2, 0.7, -0.5);
+    glScalef(1, 0.5, 1);
+    glRotatef(-90, 0, 0, 1);
+    drawEye();
+    glPopMatrix();
+}
+
 void drawDino4()
 {
 
     GLUquadric *quad = gluNewQuadric();
     rhinoTexture = loadTexture("rhino.png");
-    glColor3f(0.51, 0.77, 0.45);
+    glColor3f(0.34, 0.28, 0.25); // brown
 
     glPushMatrix();
 
@@ -1808,7 +1993,6 @@ void drawDino4()
     glScalef(1.2, 1.2, 1.2);
     glScalef(1.1, 0.8, 1.1);
     glTranslatef(0, 0.1, 3.6);
-    // glRotatef(-20, 1, 0, 0);
     gluCylinder(quad, 0.15, 0.14, 0.1, 8, 8);
     glPopMatrix();
 
@@ -1838,13 +2022,39 @@ void drawDino4()
 
     // Legs start
     glPushMatrix();
-    glTranslatef(-0.6, -0.25, 2.3);
-    glScalef(0.3, 0.6, 1);
-    glRotatef(90, 1, 0, 0);
-    doorPilePyramid(0.3, 0.5, 0.4, rhinoTexture, rhinoTexture);
+    glColor3f(0.34, 0.28, 0.25); // brown
+    drawLeg();
     glPopMatrix();
 
-      glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+    glColor3f(0.34, 0.28, 0.25); // brown
+    glScalef(-1, 1, 1);
+    drawLeg();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(0.34, 0.28, 0.25); // brown
+    drawHand();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(0.34, 0.28, 0.25); // brown
+    glScalef(-1, 1, 1);
+    drawHand();
+    glPopMatrix();
+
+    // eyes
+    glPushMatrix();
+    drawDino4Eye();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(1, 1, 1);
+    glScalef(-1, 1, 1);
+    drawDino4Eye();
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
 
     glPopMatrix();
 }
@@ -1989,51 +2199,51 @@ void drawScene()
 {
     // drawHDR();
 
-    // glPushMatrix();
-    // drawFloor();
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // drawForest();
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // drawFence();
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // glTranslatef(-19, 0, -1.5);
-    // glRotatef(270, 0, 1, 0);
-    // gate(1.8);
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // glTranslatef(5, 0, 2);
-    // drawDino(1);
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // glTranslatef(-10.0, 1.7, -10.0);
-    // glRotatef(-90, 1.0, 0.0, 0.0);
-    // glRotatef(180, 0.0, 0.0, 1.0);
-    // glScalef(1, 1, 1);
-    // glColor3f(1.0, 1.0, 1.0);
-    // drawDino2();
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // glTranslatef(dino3_movementX - 10, 1.2, dino3_movementZ + 2);
-    // glRotatef(180, 0, 1, 0);
-    // drawDino3();
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // glTranslatef(0, 8, 0);
-    // drawClouds();
-    // glPopMatrix();
+    glPushMatrix();
+    drawFloor();
+    glPopMatrix();
 
     glPushMatrix();
-    // glTranslatef(0, 8, 0);
+    drawForest();
+    glPopMatrix();
+
+    glPushMatrix();
+    drawFence();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-19, 0, -1.5);
+    glRotatef(270, 0, 1, 0);
+    gate(1.8);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(5, 0, 2);
+    drawDino(1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(-10.0, 1.7, -10.0);
+    glRotatef(-90, 1.0, 0.0, 0.0);
+    glRotatef(180, 0.0, 0.0, 1.0);
+    glScalef(1, 1, 1);
+    glColor3f(1.0, 1.0, 1.0);
+    drawDino2();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(dino3_movementX - 10, 1.2, dino3_movementZ + 2);
+    glRotatef(180, 0, 1, 0);
+    drawDino3();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 8, 0);
+    drawClouds();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0, 8, 0);
     drawDino4();
     glPopMatrix();
 
